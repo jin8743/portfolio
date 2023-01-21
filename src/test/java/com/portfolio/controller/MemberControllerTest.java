@@ -4,19 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.portfolio.domain.Member;
 import com.portfolio.domain.MemberRole;
 import com.portfolio.repository.MemberRepository;
-import com.portfolio.request.MemberJoin;
+import com.portfolio.request.MemberJoinRequest;
 import com.portfolio.service.MemberService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.MediaType.*;
@@ -50,12 +46,12 @@ class MemberControllerTest {
     @Test
     void test1() throws Exception {
         //given
-        MemberJoin memberJoin = MemberJoin.builder()
+        MemberJoinRequest memberJoinRequest = MemberJoinRequest.builder()
                 .username("username")
                 .password("pasword1234")
                 .build();
 
-        String json = objectMapper.writeValueAsString(memberJoin);
+        String json = objectMapper.writeValueAsString(memberJoinRequest);
 
         //then
         mockMvc.perform(post("/join")
@@ -77,12 +73,12 @@ class MemberControllerTest {
     @Test
     void test2() throws Exception {
         //given
-        MemberJoin memberJoin = MemberJoin.builder()
+        MemberJoinRequest memberJoinRequest = MemberJoinRequest.builder()
                 .username("youngjin")
                 .password("password1234")
                 .build();
 
-        String json = objectMapper.writeValueAsString(memberJoin);
+        String json = objectMapper.writeValueAsString(memberJoinRequest);
 
         //then
         mockMvc.perform(post("/join")
@@ -102,11 +98,11 @@ class MemberControllerTest {
     @Test
     void test3() throws Exception {
         //given
-        MemberJoin memberJoin = MemberJoin.builder()
+        MemberJoinRequest memberJoinRequest = MemberJoinRequest.builder()
                 .username(null)
                 .password("password1234").build();
 
-        String json = objectMapper.writeValueAsString(memberJoin);
+        String json = objectMapper.writeValueAsString(memberJoinRequest);
 
 
         mockMvc.perform(post("/join")
@@ -123,11 +119,11 @@ class MemberControllerTest {
     @Test
     void test4() throws Exception {
         //given
-        MemberJoin memberJoin = MemberJoin.builder()
+        MemberJoinRequest memberJoinRequest = MemberJoinRequest.builder()
                 .username("username")
                 .password(null).build();
 
-        String json = objectMapper.writeValueAsString(memberJoin);
+        String json = objectMapper.writeValueAsString(memberJoinRequest);
 
 
         mockMvc.perform(post("/join")
@@ -144,12 +140,12 @@ class MemberControllerTest {
     @Test
     void test5() throws Exception {
         //given
-        MemberJoin memberJoin = MemberJoin.builder()
+        MemberJoinRequest memberJoinRequest = MemberJoinRequest.builder()
                 .username("1")
                 .password("pasword1234")
                 .build();
 
-        String json = objectMapper.writeValueAsString(memberJoin);
+        String json = objectMapper.writeValueAsString(memberJoinRequest);
 
         //then
         mockMvc.perform(post("/join")
@@ -168,12 +164,12 @@ class MemberControllerTest {
     @Test
     void test6() throws Exception {
         //given
-        MemberJoin memberJoin = MemberJoin.builder()
+        MemberJoinRequest memberJoinRequest = MemberJoinRequest.builder()
                 .username("username")
                 .password("1")
                 .build();
 
-        String json = objectMapper.writeValueAsString(memberJoin);
+        String json = objectMapper.writeValueAsString(memberJoinRequest);
 
         //then
         mockMvc.perform(post("/join")
@@ -192,17 +188,17 @@ class MemberControllerTest {
     @Test
     void test7() throws Exception {
         //given
-        memberService.join(MemberJoin.builder()
+        memberService.join(MemberJoinRequest.builder()
                 .username("username")
                 .password("password1234")
                 .build());
 
-        MemberJoin memberJoin = MemberJoin.builder()
+        MemberJoinRequest memberJoinRequest = MemberJoinRequest.builder()
                 .username("username")
                 .password("비밀번호123456")
                 .build();
 
-        String json = objectMapper.writeValueAsString(memberJoin);
+        String json = objectMapper.writeValueAsString(memberJoinRequest);
 
         //then
         mockMvc.perform(post("/join")
@@ -213,5 +209,24 @@ class MemberControllerTest {
                 .andDo(print());
 
         assertEquals(1L, memberRepository.count());
+    }
+
+    @DisplayName("username과 password에 공백이 있으면 안된다")
+    @Test
+    void test8() throws Exception{
+        MemberJoinRequest memberJoinRequest = MemberJoinRequest.builder()
+                .username(" user  name ")
+                .password("비밀번호     123456")
+                .build();
+
+        String json = objectMapper.writeValueAsString(memberJoinRequest);
+
+        //then
+        mockMvc.perform(post("/join")
+                        .contentType(APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+
     }
 }

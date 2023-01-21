@@ -15,3 +15,8 @@ spring:
 logging:
   level:
     sql: debug
+
+
+jwt:
+  #HS256 알고리즘을 사용하여 BASE64로 인코딩된 secret key
+  secret: eL/qTd8wU/qxrUe/uebKV3/MW+bL86x7DNCz9zRDze0=

@@ -1,6 +1,8 @@
-package com.portfolio.exception;
+package com.portfolio.exception.custom;
 
-public class PostNotFoundException  extends MyPortfolioException{
+import com.portfolio.exception.MyPortfolioException;
+
+public class PostNotFoundException  extends MyPortfolioException {
 
     private static final String MESSAGE = "존재하지 않는 글입니다";
 

@@ -1,4 +1,6 @@
-package com.portfolio.exception;
+package com.portfolio.exception.custom;
+
+import com.portfolio.exception.MyPortfolioException;
 
 public class InvalidRequestException extends MyPortfolioException {
 

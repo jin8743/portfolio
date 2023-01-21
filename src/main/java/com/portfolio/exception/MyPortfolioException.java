@@ -5,6 +5,10 @@ import lombok.Getter;
 import java.util.HashMap;
 import java.util.Map;
 
+
+/**
+ * 최상위 Exception
+ */
 @Getter
 public abstract class MyPortfolioException extends RuntimeException{
 

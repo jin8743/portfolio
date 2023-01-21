@@ -1,6 +1,5 @@
-package com.portfolio.controller;
+package com.portfolio.exception;
 
-import com.portfolio.exception.MyPortfolioException;
 import com.portfolio.response.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +13,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @RestControllerAdvice
 @Slf4j
-public class ExceptionController {
+public class ExceptionAdvice {
 
     @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)

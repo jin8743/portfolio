@@ -1,6 +1,8 @@
-package com.portfolio.exception;
+package com.portfolio.exception.custom;
 
-public class DuplicateMemberException extends MyPortfolioException{
+import com.portfolio.exception.MyPortfolioException;
+
+public class DuplicateMemberException extends MyPortfolioException {
 
     private static final String MESSAGE = "이미 존재하는 아이디 입니다";
 
