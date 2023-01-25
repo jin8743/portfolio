@@ -1,89 +1,71 @@
 package com.portfolio.config.jwt;
 
-import com.portfolio.exception.custom.AuthenticationFailedException;
-import com.portfolio.exception.custom.InvalidJwtRequest;
-import com.portfolio.exception.custom.InvalidLoginRequestException;
-import com.portfolio.exception.custom.InvalidRequestException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.Nullable;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.*;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class JwtFilter  extends AbstractAuthenticationProcessingFilter {
+import static com.portfolio.config.jwt.JwtUtil.AUTHORIZATION_HEADER;
+import static org.springframework.security.core.context.SecurityContextHolder.*;
+import static org.springframework.util.StringUtils.*;
 
-    private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher("/login", "post");
+@RequiredArgsConstructor
+@Slf4j
+public class JwtFilter extends OncePerRequestFilter {
 
-    public static final String AUTHORIZATION_HEADER = "Authorization";
-
-
-    private final AuthenticationManager authenticationManager;
-
-
-    public JwtFilter(AuthenticationManager authenticationManager) {
-        super(DEFAULT_ANT_PATH_REQUEST_MATCHER, authenticationManager);
-        this.authenticationManager = authenticationManager;
-    }
+    private final JwtUtil jwtUtil;
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        UsernamePasswordAuthenticationToken unauthenticatedToken = createUnauthenticatedToken(request);
-        return authenticationManager.authenticate(unauthenticatedToken);
-    }
+        String jwt = resolveToken(request);
 
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        HttpServletRequest httpReq = (HttpServletRequest) request;
-        HttpServletResponse httpRes = (HttpServletResponse) response;
+        if (hasText(jwt) && jwtUtil.validateToken(jwt)
+                && getContext().getAuthentication() == null) {
 
-        String jwt = resolveToken(httpReq);
-        if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-            Authentication authentication = tokenProvider.getAuthentication(jwt);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            setDetails(jwtUtil.getAuthenticationToken(jwt), request);
+            getContext().setAuthentication(jwtUtil.getAuthenticationToken(jwt));
         } else {
-            throw new InvalidJwtRequest();
+            logger.debug("유효한 JWT 토큰이 없습니다");
         }
-
-        chain.doFilter(request, response);
+        filterChain.doFilter(request, response);
     }
 
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+
+        if (hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
-
         return null;
     }
 
-    private UsernamePasswordAuthenticationToken createUnauthenticatedToken(HttpServletRequest request) {
-
-        if (!request.getMethod().equals("POST")) {
-            throw new InvalidRequestException();
-        }
-
-        String username = obtainUsername(request);
-        String password = obtainPassword(request);
-        return new UsernamePasswordAuthenticationToken(username, password);
+    private void setDetails(UsernamePasswordAuthenticationToken token, HttpServletRequest request) {
+        token.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
     }
 
-    private String obtainUsername(HttpServletRequest request) {
-        return request.getParameter("username");
+    @Bean
+    public AuthenticationManager authManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+
+        return authenticationManagerBuilder.build();
     }
 
-    private String obtainPassword(HttpServletRequest request) {
-        return request.getParameter("password");
-    }
 }

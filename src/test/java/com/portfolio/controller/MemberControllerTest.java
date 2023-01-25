@@ -67,6 +67,7 @@ class MemberControllerTest {
         Member member = memberRepository.findAll().get(0);
         assertEquals("username", member.getUsername());
         assertEquals(MemberRole.ROLE_MEMBER, member.getRole());
+        System.out.println(member.getRole().toString());
     }
 
     @DisplayName("/join 요청시 username이 youngjin인 경우 ADMIN권한을 갖는다")
@@ -227,6 +228,8 @@ class MemberControllerTest {
                         .content(json))
                 .andExpect(status().isBadRequest())
                 .andDo(print());
+
+
 
     }
 }

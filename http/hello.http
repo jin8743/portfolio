@@ -1,0 +1,3 @@
+GET http://localhost:8080/hello
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ5b3VuZ2ppbiIsImF1dGgiOiJbUk9MRV9BRE1JTl0iLCJpZCI6MSwiZXhwIjoxNjc0Mzk3OTUyfQ.Hwp-zUO-wGkbB1x_wBaI7PFlqxq4aXMJLL_gzqUC4rM

@@ -4,8 +4,6 @@ import com.portfolio.domain.Member;
 import com.portfolio.exception.custom.InvalidLoginRequestException;
 import com.portfolio.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;

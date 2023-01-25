@@ -3,71 +3,56 @@ package com.portfolio.config.jwt;
 import com.portfolio.config.auth.CustomUserDetails;
 import com.portfolio.config.auth.CustomUserDetailsService;
 import com.portfolio.domain.Member;
-import com.portfolio.exception.custom.InvalidLoginRequestException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import java.security.Key;
 import java.util.Date;
 
 @RequiredArgsConstructor
 @Slf4j
 @Component
-public class TokenProvider implements AuthenticationProvider {
+public class  JwtUtil {
 
-    private static final String AUTHORITY = "auth";
-
-    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000L * 60 * 60 * 12;
-
+    //토큰 유효시간 1시간으로 설정
     private static final String ACCESS_USER_ID = "id";
-
-    private final PasswordEncoder passwordEncoder;
-
-    private final CustomUserDetailsService userDetailsService;
+    private static final long ACCESS_TOKEN_EXPIRE_TIME = 60 * 60 * 1000;
+    private static final String AUTHORITY = "auth";
+    public static final String AUTHORIZATION_HEADER = "Authorization";
 
     @Value("${jwt.secret}")
     private String secretKey;
-
     private Key key;
 
+    private final CustomUserDetailsService customUserDetailsService;
+
+
     @PostConstruct
-    private void init() {
+    public void afterPropertiesSet() throws Exception {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        String username = (String) authentication.getPrincipal();
-        String password = (String) authentication.getCredentials();
-
-        CustomUserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-        if (!passwordEncoder.matches(password, userDetails.getPassword())) {
-            throw new InvalidLoginRequestException();
-        }
-
-        return new UsernamePasswordAuthenticationToken(userDetails.getMember(), "", userDetails.getAuthorities());
-    }
 
 
     public String createToken(Authentication authentication) {
+
         /**
          * 토큰 발급을 위한 데이터 전달 부분
          */
         String authority = authentication.getAuthorities().toString();
-        Member member = (Member) authentication.getPrincipal();
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        Member member = customUserDetails.getMember();
 
         long now = (new Date()).getTime();
         Date tokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
@@ -81,10 +66,7 @@ public class TokenProvider implements AuthenticationProvider {
                 .compact();
     }
 
-    /**
-     * @method: 컨텍스트에 해당 유저에 대한 권한 전달하여 접근 허용 또는 거부 진행
-     */
-    public Authentication getAuthentication(String token) {
+    public UsernamePasswordAuthenticationToken getAuthenticationToken(String token) {
         Claims claims = Jwts
                 .parserBuilder()
                 .setSigningKey(key)
@@ -92,13 +74,10 @@ public class TokenProvider implements AuthenticationProvider {
                 .parseClaimsJws(token)
                 .getBody();
 
-
         String username = claims.getSubject();
-        CustomUserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        return new UsernamePasswordAuthenticationToken(userDetails.getMember(), "",  userDetails.getAuthorities());
+        CustomUserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
-
-
 
     public boolean validateToken(String token) {
         try {
@@ -116,11 +95,14 @@ public class TokenProvider implements AuthenticationProvider {
         return false;
     }
 
-    @Override
-    public boolean supports(Class<?> authentication) {
-        return authentication.equals(UsernamePasswordAuthenticationToken.class);
+    public String resolveToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+
+        return null;
     }
 
 }
-
-

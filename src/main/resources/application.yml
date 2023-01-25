@@ -12,6 +12,15 @@ spring:
       hibernate:
         format_sql: true
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://idp.example.com/issuer
+          jwk-set-uri: https://idp.example.com/.well-known/jwks.json
+
+
+
 logging:
   level:
     sql: debug
