@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -38,6 +39,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
             //Jwt 토큰 검증을 통해서 정상인 경우 Authentication 객체 생성
             UsernamePasswordAuthenticationToken authentication = jwtUtil.getAuthenticationToken(jwt);
+
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
             //강제로 시큐리티의 세션에 접근하여 Authentication 객체를 저장
             SecurityContextHolder.getContext().setAuthentication(authentication);

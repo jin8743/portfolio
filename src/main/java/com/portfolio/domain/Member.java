@@ -1,5 +1,7 @@
 package com.portfolio.domain;
 
+import com.portfolio.exception.custom.AuthenticationFailedException;
+import jdk.jfr.Unsigned;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,10 +25,8 @@ public class Member extends BaseEntity{
     @Column(name = "member_id")
     private Long id;
 
-    @Column(nullable = false, length = 20, unique = true)
+    @Column(unique = true)
     private String username;
-
-    @Column(nullable = false, length = 100)
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -38,5 +38,21 @@ public class Member extends BaseEntity{
         this.username = username;
         this.password = password;
         this.role = role;
+    }
+
+    public static Post validatePost(Post post, Member member) {
+        if (post.getMember() == member) {
+            return post;
+        } else {
+            throw new AuthenticationFailedException();
+        }
+    }
+
+    public static Comment validateComment(Comment comment, Member member) {
+        if (comment.getMember() == member) {
+            return comment;
+        } else {
+            throw new AuthenticationFailedException();
+        }
     }
 }

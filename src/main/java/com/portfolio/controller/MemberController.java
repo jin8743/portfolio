@@ -36,6 +36,7 @@ public class MemberController {
     @PostMapping("/auth")
     public void auth(Authentication authentication) {
         System.out.println(authentication.getPrincipal());
-
+         Object memberId = authentication.getCredentials();
+        System.out.println(memberId);
     }
 }

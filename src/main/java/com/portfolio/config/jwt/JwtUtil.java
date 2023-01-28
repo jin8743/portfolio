@@ -75,6 +75,7 @@ public class  JwtUtil {
                 .getBody();
 
         String username = claims.getSubject();
+
         CustomUserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }

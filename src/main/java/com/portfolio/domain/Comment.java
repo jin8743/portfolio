@@ -1,5 +1,7 @@
 package com.portfolio.domain;
 
+import com.portfolio.request.CommentCreateRequest;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -18,13 +20,25 @@ public class Comment extends BaseEntity{
     @Column(name = "comment_id")
     private Long id;
 
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "post_id")
+    private Post post;
+
     private String content;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "post_id")
-    private Post post;
+    @Builder
+    public Comment(Post post, String content, Member member) {
+        //양방향 연관관계 설정
+        this.post = post;
+        post.getComments().add(this);
+
+        this.content = content;
+        this.member = member;
+    }
+
+
 }

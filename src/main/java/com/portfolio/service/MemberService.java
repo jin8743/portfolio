@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+import static com.portfolio.request.MemberJoinRequest.*;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -30,7 +32,7 @@ public class MemberService {
             throw new DuplicateMemberException();
         }
 
-        memberRepository.save(MemberJoinRequest.toMember(memberJoinRequest, passwordEncoder));
+        memberRepository.save(toMember(memberJoinRequest, passwordEncoder));
     }
 
 }
