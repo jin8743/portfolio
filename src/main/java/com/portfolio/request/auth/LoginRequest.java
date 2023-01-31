@@ -1,4 +1,4 @@
-package com.portfolio.request;
+package com.portfolio.request.auth;
 
 import lombok.Builder;
 import lombok.Data;

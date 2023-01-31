@@ -1,10 +1,12 @@
 package com.portfolio.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.portfolio.repository.util.MemberUtil;
 import com.portfolio.domain.Member;
 import com.portfolio.domain.MemberRole;
 import com.portfolio.repository.MemberRepository;
-import com.portfolio.request.MemberJoinRequest;
+import com.portfolio.request.auth.LoginRequest;
+import com.portfolio.request.auth.MemberJoinRequest;
 import com.portfolio.service.MemberService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,6 +38,9 @@ class MemberControllerTest {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    MemberUtil memberUtil;
 
     @BeforeEach
     void clear() {
@@ -95,13 +100,14 @@ class MemberControllerTest {
         assertEquals(MemberRole.ROLE_ADMIN, member.getRole());
     }
 
-    @DisplayName("/join 요청시 username은 필수다")
+    @DisplayName("/join 요청시 username과 password는 필수다")
     @Test
     void test3() throws Exception {
         //given
         MemberJoinRequest memberJoinRequest = MemberJoinRequest.builder()
                 .username(null)
-                .password("password1234").build();
+                .password(null)
+                .build();
 
         String json = objectMapper.writeValueAsString(memberJoinRequest);
 
@@ -113,60 +119,16 @@ class MemberControllerTest {
                 .andExpect(jsonPath("$.code").value("400"))
                 .andExpect(jsonPath("$.message").value("잘못된 요청입니다"))
                 .andExpect(jsonPath("$.validation.username").value("아이디를 입력해주세요"))
-                .andDo(print());
-    }
-
-    @DisplayName("/join 요청시 password는 필수다")
-    @Test
-    void test4() throws Exception {
-        //given
-        MemberJoinRequest memberJoinRequest = MemberJoinRequest.builder()
-                .username("username")
-                .password(null).build();
-
-        String json = objectMapper.writeValueAsString(memberJoinRequest);
-
-
-        mockMvc.perform(post("/join")
-                        .contentType(APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("400"))
-                .andExpect(jsonPath("$.message").value("잘못된 요청입니다"))
                 .andExpect(jsonPath("$.validation.password").value("비밀번호를 입력해주세요"))
                 .andDo(print());
     }
 
-    @DisplayName("/join 요청시 username은 3글자 이상, 20글자 이하로 입력해야한다")
+    @DisplayName("/join 요청시 username은 3글자 이상, password는 10글자 이상으로 입력해야한다")
     @Test
     void test5() throws Exception {
         //given
         MemberJoinRequest memberJoinRequest = MemberJoinRequest.builder()
                 .username("1")
-                .password("pasword1234")
-                .build();
-
-        String json = objectMapper.writeValueAsString(memberJoinRequest);
-
-        //then
-        mockMvc.perform(post("/join")
-                        .contentType(APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("400"))
-                .andExpect(jsonPath("$.message").value("잘못된 요청입니다"))
-                .andExpect(jsonPath("$.validation.username").value("아이디는 8글자 이상 20글자 이상으로 입력해주세요"))
-                .andDo(print());
-
-        assertEquals(0L, memberRepository.count());
-    }
-
-    @DisplayName("/join 요청시 password는 10글자 이상, 20글자 이하로 입력해야한다")
-    @Test
-    void test6() throws Exception {
-        //given
-        MemberJoinRequest memberJoinRequest = MemberJoinRequest.builder()
-                .username("username")
                 .password("1")
                 .build();
 
@@ -179,15 +141,87 @@ class MemberControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("400"))
                 .andExpect(jsonPath("$.message").value("잘못된 요청입니다"))
-                .andExpect(jsonPath("$.validation.password").value("비밀번호는 10글자 이상 20글자 이상으로 입력해주세요"))
+                .andExpect(jsonPath("$.validation.username").value("아이디는 영어와 숫자를 포함하여 3~20자리 이내로 입력해주세요."))
+                .andExpect(jsonPath("$.validation.password").value("비밀번호는 영어와 숫자로 포함해서 8~20자리 이내로 입력해주세요."))
                 .andDo(print());
 
         assertEquals(0L, memberRepository.count());
     }
 
-    @DisplayName("/join 요청시 username은 중복되면 안된다")
+    @DisplayName("/join 요청시 username은 20글자 이하, password는 20글자 이하로 입력해야한다")
+    @Test
+    void test6() throws Exception {
+        //given
+        MemberJoinRequest memberJoinRequest = MemberJoinRequest.builder()
+                .username("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+                .password("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+                .build();
+
+        String json = objectMapper.writeValueAsString(memberJoinRequest);
+
+        //then
+        mockMvc.perform(post("/join")
+                        .contentType(APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("400"))
+                .andExpect(jsonPath("$.message").value("잘못된 요청입니다"))
+                .andExpect(jsonPath("$.validation.username").value("아이디는 영어와 숫자를 포함하여 3~20자리 이내로 입력해주세요."))
+                .andExpect(jsonPath("$.validation.password").value("비밀번호는 영어와 숫자로 포함해서 8~20자리 이내로 입력해주세요."))
+                .andDo(print());
+
+        assertEquals(0L, memberRepository.count());
+    }
+
+    @DisplayName("/join 요청시 username과 password는 영어와 숫자만 입력해야한다")
     @Test
     void test7() throws Exception {
+        //given
+        MemberJoinRequest memberJoinRequest = MemberJoinRequest.builder()
+                .username("1!2@3#4$5%abcㄱㄴㄷ")
+                .password("1!2@3#4$5%abcㄱㄴㄷ")
+                .build();
+
+        String json = objectMapper.writeValueAsString(memberJoinRequest);
+
+        //then
+        mockMvc.perform(post("/join")
+                        .contentType(APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("400"))
+                .andExpect(jsonPath("$.message").value("잘못된 요청입니다"))
+                .andExpect(jsonPath("$.validation.username").value("아이디는 영어와 숫자를 포함하여 3~20자리 이내로 입력해주세요."))
+                .andExpect(jsonPath("$.validation.password").value("비밀번호는 영어와 숫자로 포함해서 8~20자리 이내로 입력해주세요."))
+                .andDo(print());
+
+        assertEquals(0L, memberRepository.count());
+    }
+    @DisplayName("username과 password에 공백이 있으면 안된다")
+    @Test
+    void test8() throws Exception {
+        MemberJoinRequest memberJoinRequest = MemberJoinRequest.builder()
+                .username(" user  name ")
+                .password("비밀번호     123456")
+                .build();
+
+        String json = objectMapper.writeValueAsString(memberJoinRequest);
+
+        //then
+        mockMvc.perform(post("/join")
+                        .contentType(APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("400"))
+                .andExpect(jsonPath("$.message").value("잘못된 요청입니다"))
+                .andExpect(jsonPath("$.validation.username").value("아이디는 영어와 숫자를 포함하여 3~20자리 이내로 입력해주세요."))
+                .andExpect(jsonPath("$.validation.password").value("비밀번호는 영어와 숫자로 포함해서 8~20자리 이내로 입력해주세요."))
+                .andDo(print());
+    }
+
+    @DisplayName("/join 요청시 username은 중복되면 안된다")
+    @Test
+    void test9() throws Exception {
         //given
         memberService.join(MemberJoinRequest.builder()
                 .username("username")
@@ -196,7 +230,7 @@ class MemberControllerTest {
 
         MemberJoinRequest memberJoinRequest = MemberJoinRequest.builder()
                 .username("username")
-                .password("비밀번호123456")
+                .password("password123456")
                 .build();
 
         String json = objectMapper.writeValueAsString(memberJoinRequest);
@@ -212,24 +246,33 @@ class MemberControllerTest {
         assertEquals(1L, memberRepository.count());
     }
 
-    @DisplayName("username과 password에 공백이 있으면 안된다")
+
+
+    @DisplayName("login 요청시 jwt토큰이 정상적으로 발급된다")
     @Test
-    void test8() throws Exception{
-        MemberJoinRequest memberJoinRequest = MemberJoinRequest.builder()
-                .username(" user  name ")
-                .password("비밀번호     123456")
+    void test10() throws Exception {
+
+        memberService.join(MemberJoinRequest.builder()
+                .username("username")
+                .password("password1234")
+                .build());
+
+        LoginRequest loginRequest = LoginRequest.builder()
+                .username("username")
+                .password("password1234")
                 .build();
 
-        String json = objectMapper.writeValueAsString(memberJoinRequest);
+        String json = objectMapper.writeValueAsString(loginRequest);
 
-        //then
-        mockMvc.perform(post("/join")
+        mockMvc.perform(post("/login")
                         .contentType(APPLICATION_JSON)
                         .content(json))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isOk())
+                .andExpect(header().exists("Authorization"))
                 .andDo(print());
 
-
+        Member member = memberUtil.getContextMember();
+        System.out.println(member);
 
     }
 }

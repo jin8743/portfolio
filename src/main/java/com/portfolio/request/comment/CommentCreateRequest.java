@@ -1,4 +1,4 @@
-package com.portfolio.request;
+package com.portfolio.request.comment;
 
 import com.portfolio.domain.Comment;
 import com.portfolio.domain.Member;

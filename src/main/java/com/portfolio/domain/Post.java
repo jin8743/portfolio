@@ -1,6 +1,7 @@
 package com.portfolio.domain;
 
 import com.portfolio.domain.util.PostEditor;
+import com.portfolio.exception.custom.PostNotFoundException;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,16 +29,22 @@ public class Post extends BaseEntity{
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
-    private Member member;
+    private  Member member;
 
     @OneToMany(mappedBy = "post")
     private List<Comment> comments = new ArrayList<>();
 
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "board_id")
+    private Board board;
+
+
     @Builder
-    public Post(String title, String content, Member member) {
+    public Post(String title, String content, Member member, Board board) {
         this.title = title;
         this.content = content;
         this.member = member;
+        this.board = board;
     }
 
     public PostEditor.PostEditorBuilder toEditor() {
@@ -50,5 +57,11 @@ public class Post extends BaseEntity{
     public void edit(PostEditor postEditor) {
         this.title = postEditor.getTitle();
         this.content = postEditor.getContent();
+    }
+
+    public static void validateBoard(Post post, Board board) {
+        if (post.getBoard() != board) {
+            throw new PostNotFoundException();
+        }
     }
 }

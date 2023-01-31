@@ -1,16 +1,13 @@
 package com.portfolio.controller;
 
-import com.portfolio.request.LoginRequest;
-import com.portfolio.request.MemberJoinRequest;
+import com.portfolio.request.auth.MemberEditRequest;
+import com.portfolio.request.auth.MemberJoinRequest;
 import com.portfolio.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,6 +25,11 @@ public class MemberController {
         memberService.join(memberJoinRequest);
     }
 
+//    @GetMapping("/{username}")
+//    public MemberResponse get(@PathVariable String username) {
+//        memberService.find(username);
+//    }
+
     @GetMapping("/hello")
     public String hello() {
         return "hello";
@@ -36,7 +38,17 @@ public class MemberController {
     @PostMapping("/auth")
     public void auth(Authentication authentication) {
         System.out.println(authentication.getPrincipal());
-         Object memberId = authentication.getCredentials();
+        Object memberId = authentication.getCredentials();
         System.out.println(memberId);
+    }
+
+    @PatchMapping("/myPage/edit")
+    public void update(@RequestBody MemberEditRequest editRequest) {
+        memberService.edit(editRequest);
+    }
+
+    @DeleteMapping("/myPage/unregister")
+    public void unregister() {
+        memberService.delete();
     }
 }

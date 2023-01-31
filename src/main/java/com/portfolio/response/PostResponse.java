@@ -1,5 +1,6 @@
 package com.portfolio.response;
 
+import com.portfolio.domain.Board;
 import com.portfolio.domain.Comment;
 import com.portfolio.domain.Post;
 import lombok.Builder;
@@ -16,14 +17,19 @@ public class PostResponse {
     private final String title;
     private final String content;
     private final List<Comment> comments;
+
+    private final Board board;
     private final LocalDateTime lastModifiedDate;
 
     @Builder
-    public PostResponse(Long id, String title, String content, List<Comment> comments, LocalDateTime lastModifiedDate) {
+    public PostResponse(Long id, String title, String content, List<Comment> comments, Board board,
+                        LocalDateTime lastModifiedDate) {
+
         this.id = id;
         this.title = title;
         this.content = content;
         this.comments = comments != null ? comments : new ArrayList<>();
+        this.board = board;
         this.lastModifiedDate = lastModifiedDate;
     }
 
@@ -32,6 +38,7 @@ public class PostResponse {
         this.title = post.getTitle();
         this.content = post.getContent();
         this.comments = post.getComments();
+        this.board = post.getBoard();
         this.lastModifiedDate = post.getLastModifiedDate();
     }
 }

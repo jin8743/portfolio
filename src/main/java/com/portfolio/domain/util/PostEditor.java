@@ -1,7 +1,7 @@
 package com.portfolio.domain.util;
 
 import com.portfolio.domain.Post;
-import com.portfolio.request.PostEditRequest;
+import com.portfolio.request.post.PostEditRequest;
 import lombok.Builder;
 import lombok.Data;
 

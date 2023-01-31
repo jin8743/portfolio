@@ -1,5 +1,6 @@
 package com.portfolio.domain;
 
+import com.portfolio.domain.util.MemberEditor;
 import com.portfolio.exception.custom.AuthenticationFailedException;
 import jdk.jfr.Unsigned;
 import lombok.AccessLevel;
@@ -13,6 +14,7 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.portfolio.domain.MemberRole.*;
 import static javax.persistence.GenerationType.IDENTITY;
 
 @Entity
@@ -27,6 +29,7 @@ public class Member extends BaseEntity{
 
     @Column(unique = true)
     private String username;
+
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -40,10 +43,8 @@ public class Member extends BaseEntity{
         this.role = role;
     }
 
-    public static Post validatePost(Post post, Member member) {
-        if (post.getMember() == member) {
-            return post;
-        } else {
+    public static void validatePost(Post post, Member member) {
+        if (post.getMember() != member) {
             throw new AuthenticationFailedException();
         }
     }
@@ -55,4 +56,19 @@ public class Member extends BaseEntity{
             throw new AuthenticationFailedException();
         }
     }
+
+    public MemberEditor.MemberEditorBuilder toEditor() {
+        return MemberEditor.builder()
+                .password(password);
+    }
+
+    /** 여기서만 데이터 수정 가능 */
+    public void edit(MemberEditor memberEditor) {
+        this.password = memberEditor.getPassword();
+    }
+
+    public static Boolean isAdmin(Member member) {
+        return member.getRole().equals(ROLE_ADMIN);
+    }
+
 }

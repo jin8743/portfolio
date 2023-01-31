@@ -1,4 +1,4 @@
-package com.portfolio.request;
+package com.portfolio.request.post;
 
 import com.portfolio.domain.Post;
 import com.portfolio.domain.util.PostEditor;

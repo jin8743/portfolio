@@ -1,6 +1,6 @@
 package com.portfolio.domain;
 
-import com.portfolio.request.CommentCreateRequest;
+import com.portfolio.domain.util.CommentEditor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,6 +38,16 @@ public class Comment extends BaseEntity{
 
         this.content = content;
         this.member = member;
+    }
+
+    public CommentEditor.CommentEditorBuilder toEditor() {
+        return CommentEditor.builder()
+                .content(content);
+    }
+
+    /** 여기서만 데이터 수정 가능 */
+    public void edit(CommentEditor commentEditor) {
+        this.content = commentEditor.getContent();
     }
 
 

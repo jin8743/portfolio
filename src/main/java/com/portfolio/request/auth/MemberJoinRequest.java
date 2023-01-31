@@ -1,4 +1,4 @@
-package com.portfolio.request;
+package com.portfolio.request.auth;
 
 import com.portfolio.domain.Member;
 import com.portfolio.domain.MemberRole;
@@ -9,7 +9,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 import static com.portfolio.domain.MemberRole.*;
 
