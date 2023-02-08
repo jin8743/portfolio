@@ -26,12 +26,13 @@ public class MemberService {
 
 
     @Transactional
-    public void join(MemberJoinRequest memberJoinRequest) {
+    public void join(MemberJoinRequest joinRequest) {
         //중복처리
-        if (memberRepository.findByUsername(memberJoinRequest.getUsername()).orElse(null) != null) {
+        if (!memberRepository.existsByUsername(joinRequest.getUsername())) {
+            memberRepository.save(toMember(joinRequest, passwordEncoder));
+        } else {
             throw new DuplicateMemberException();
         }
-        memberRepository.save(toMember(memberJoinRequest, passwordEncoder));
     }
 
     @Transactional
@@ -40,8 +41,8 @@ public class MemberService {
         editMember(editRequest, member, passwordEncoder);
     }
 
-//    public MemberResponse find(String username) {
-//        Member member = findMember(username);
+//    public MemberPostResponse findPost(String username, int page) {
+//        Member member = memberUtil.getMember(username);
 //
 //    }
 
@@ -50,6 +51,7 @@ public class MemberService {
         Member member = memberUtil.getContextMember();
         memberRepository.delete(member);
     }
+
 
 
 }

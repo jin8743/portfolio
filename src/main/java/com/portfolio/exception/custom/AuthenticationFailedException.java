@@ -1,10 +1,11 @@
 package com.portfolio.exception.custom;
 
-import com.portfolio.exception.MyPortfolioException;
+import com.portfolio.exception.DefaultException;
 
-public class AuthenticationFailedException extends MyPortfolioException {
+public class AuthenticationFailedException extends DefaultException {
 
-    private static final String MESSAGE = "사용자 인증을 실패하였습니다.";
+    private static final String MESSAGE = "인증에 대한 권한 실패\n" +
+            "권한이 없거나 인증을 하지 못하였습니다.";
 
     public AuthenticationFailedException() {
         super(MESSAGE);

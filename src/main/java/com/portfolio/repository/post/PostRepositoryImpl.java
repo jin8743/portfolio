@@ -1,15 +1,16 @@
 package com.portfolio.repository.post;
 
-import com.portfolio.domain.Board;
-import com.portfolio.domain.Member;
-import com.portfolio.domain.Post;
-import com.portfolio.repository.post.PostRepositoryCustom;
+import com.portfolio.domain.*;
+import com.portfolio.request.post.BoardSearchRequest;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
+import static com.portfolio.domain.QBoard.*;
+import static com.portfolio.domain.QComment.*;
+import static com.portfolio.domain.QMember.*;
 import static com.portfolio.domain.QPost.*;
 import static java.lang.Math.*;
 
@@ -20,17 +21,42 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
 
     @Override
-    public List<Post> getList(Board board, int page, Member member) {
+    public Post findWithId(Long postId) {
+        return jpaQueryFactory
+                .selectDistinct(post)
+                .from(post)
+                .where(post.id.eq(postId))
+                .join(post.member, member).fetchJoin()
+                .join(post.board, board).fetchJoin()
+                .join(post.comments, comment).fetchJoin()
+                .orderBy(comment.id.desc())
+                .fetchOne();
+    }
+
+    @Override
+    public List<Post> boardList(BoardSearchRequest searchRequest) {
         return jpaQueryFactory
                 .selectFrom(post)
-                .where(
-                        memberEq(member),
-                        boardEq(board))
+                .where(post.board.boardName.eq(searchRequest.getId()))
+                .join(post.member, member).fetchJoin()
+                .join(post.board, board).fetchJoin()
+                .orderBy(post.id.desc())
+                .offset(searchRequest.getOffset())
+                .limit(searchRequest.getList_num())
+                .fetch();
+    }
+
+    @Override
+    public List<Post> memberList(Member findMember, int page) {
+        return jpaQueryFactory.selectFrom(post)
+                .where(post.member.eq(findMember))
+                .join(post.board, board).fetchJoin()
                 .orderBy(post.id.desc())
                 .offset(getOffset(page))
                 .limit(20)
                 .fetch();
     }
+
 
     private BooleanExpression memberEq(Member member) {
         return member != null ? post.member.eq(member) : null;

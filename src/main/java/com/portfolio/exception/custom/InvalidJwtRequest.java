@@ -1,8 +1,8 @@
 package com.portfolio.exception.custom;
 
-import com.portfolio.exception.MyPortfolioException;
+import com.portfolio.exception.DefaultException;
 
-public class InvalidJwtRequest extends MyPortfolioException {
+public class InvalidJwtRequest extends DefaultException {
 
     private static final String MESSAGE = "JWT 토큰값이 유효하지 않습니다";
 

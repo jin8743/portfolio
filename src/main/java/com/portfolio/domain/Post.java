@@ -2,10 +2,8 @@ package com.portfolio.domain;
 
 import com.portfolio.domain.util.PostEditor;
 import com.portfolio.exception.custom.PostNotFoundException;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -59,9 +57,5 @@ public class Post extends BaseEntity{
         this.content = postEditor.getContent();
     }
 
-    public static void validateBoard(Post post, Board board) {
-        if (post.getBoard() != board) {
-            throw new PostNotFoundException();
-        }
-    }
+
 }

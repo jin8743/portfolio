@@ -13,7 +13,8 @@ public class PostUtil {
     private final PostRepository postRepository;
 
     public Post getPost(Long postId) {
-        return postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
+        return postRepository.findById(postId)
+                .orElseThrow(PostNotFoundException::new);
     }
 }
 

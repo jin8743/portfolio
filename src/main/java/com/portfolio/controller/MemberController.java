@@ -5,7 +5,6 @@ import com.portfolio.request.auth.MemberJoinRequest;
 import com.portfolio.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +15,6 @@ public class MemberController {
 
     private final MemberService memberService;
 
-
     /**
      * 회원가입
      */
@@ -25,22 +23,13 @@ public class MemberController {
         memberService.join(memberJoinRequest);
     }
 
-//    @GetMapping("/{username}")
-//    public MemberResponse get(@PathVariable String username) {
-//        memberService.find(username);
+//    @GetMapping("/profile/{username}")
+//    public MemberPostResponse get(@PathVariable String username,
+//                                  @RequestParam(required = false) Integer page) {
+//
+//        memberService.findPost(username, page);
 //    }
 
-    @GetMapping("/hello")
-    public String hello() {
-        return "hello";
-    }
-
-    @PostMapping("/auth")
-    public void auth(Authentication authentication) {
-        System.out.println(authentication.getPrincipal());
-        Object memberId = authentication.getCredentials();
-        System.out.println(memberId);
-    }
 
     @PatchMapping("/myPage/edit")
     public void update(@RequestBody MemberEditRequest editRequest) {

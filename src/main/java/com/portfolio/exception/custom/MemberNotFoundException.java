@@ -1,8 +1,8 @@
 package com.portfolio.exception.custom;
 
-import com.portfolio.exception.MyPortfolioException;
+import com.portfolio.exception.DefaultException;
 
-public class MemberNotFoundException extends MyPortfolioException {
+public class MemberNotFoundException extends DefaultException {
 
     private static final String MESSAGE = "사용자를 찾을수 없습니다.";
 

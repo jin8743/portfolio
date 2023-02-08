@@ -3,7 +3,6 @@ package com.portfolio.controller;
 import com.portfolio.request.comment.CommentCreateRequest;
 import com.portfolio.request.comment.CommentEditRequest;
 import com.portfolio.response.CommentResponse;
-import com.portfolio.response.PostResponse;
 import com.portfolio.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;

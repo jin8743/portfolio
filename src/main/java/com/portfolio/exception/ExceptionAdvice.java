@@ -27,8 +27,8 @@ public class ExceptionAdvice {
         return response;
     }
 
-    @ExceptionHandler(MyPortfolioException.class)
-    public ResponseEntity<ErrorResponse> myPortfolioExceptionHandler(MyPortfolioException e) {
+    @ExceptionHandler(DefaultException.class)
+    public ResponseEntity<ErrorResponse> myPortfolioExceptionHandler(DefaultException e) {
         int statusCode = e.getStatusCode();
 
         ErrorResponse body = ErrorResponse.builder()

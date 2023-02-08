@@ -1,8 +1,8 @@
 package com.portfolio.exception.custom;
 
-import com.portfolio.exception.MyPortfolioException;
+import com.portfolio.exception.DefaultException;
 
-public class InvalidLoginRequestException extends MyPortfolioException {
+public class InvalidLoginRequestException extends DefaultException {
 
     private static final String MESSAGE = "아이디 또는 비밀번호를 잘못 입력했습니다. 입력하신 내용을 다시 확인해주세요.";
 

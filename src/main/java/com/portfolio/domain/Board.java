@@ -1,5 +1,6 @@
 package com.portfolio.domain;
 
+import com.portfolio.exception.custom.PostNotFoundException;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,11 +24,14 @@ public class Board extends BaseEntity{
 
     private String boardName;
 
-    private Boolean isEnabled;
-
     @Builder
-    public Board(String boardName, Boolean isEnabled) {
+    public Board(String boardName) {
         this.boardName = boardName;
-        this.isEnabled = isEnabled;
+    }
+
+    public static void validateBoard(Board board, String boardName) {
+        if (!board.getBoardName().equals(boardName)) {
+            throw new PostNotFoundException();
+        }
     }
 }

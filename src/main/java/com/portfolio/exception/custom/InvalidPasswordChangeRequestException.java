@@ -1,8 +1,8 @@
 package com.portfolio.exception.custom;
 
-import com.portfolio.exception.MyPortfolioException;
+import com.portfolio.exception.DefaultException;
 
-public class InvalidPasswordChangeRequestException extends MyPortfolioException {
+public class InvalidPasswordChangeRequestException extends DefaultException {
     public static final String MESSAGE = "현재 비밀번호와 동일합니다.";
 
     public InvalidPasswordChangeRequestException() {

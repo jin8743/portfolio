@@ -4,11 +4,13 @@ import com.portfolio.domain.Post;
 import com.portfolio.domain.util.PostEditor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 @Data
+@NoArgsConstructor
 public class PostEditRequest {
 
     @NotBlank(message = "제목을 입력해주세요")

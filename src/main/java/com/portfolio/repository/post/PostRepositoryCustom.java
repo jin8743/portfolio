@@ -1,15 +1,19 @@
 package com.portfolio.repository.post;
 
-import com.portfolio.domain.Board;
 import com.portfolio.domain.Member;
 import com.portfolio.domain.Post;
-import com.portfolio.response.PostResponse;
+import com.portfolio.request.post.BoardSearchRequest;
 
 import java.util.List;
+import java.util.ListResourceBundle;
 
 public interface PostRepositoryCustom {
 
 
-    List<Post> getList(Board board, int page, Member member);
+    Post findWithId(Long id);
+
+    List<Post> boardList(BoardSearchRequest boardSearchRequest);
+
+    List<Post> memberList(Member member, int page);
 
 }

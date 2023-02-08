@@ -1,12 +1,21 @@
 package com.portfolio.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.portfolio.domain.Board;
+import com.portfolio.domain.Comment;
+import com.portfolio.domain.Member;
+import com.portfolio.exception.custom.MemberNotFoundException;
+import com.portfolio.repository.board.BoardRepository;
+import com.portfolio.repository.comment.CommentRepository;
 import com.portfolio.repository.util.MemberUtil;
 import com.portfolio.domain.Post;
 import com.portfolio.repository.MemberRepository;
 import com.portfolio.repository.post.PostRepository;
 import com.portfolio.request.auth.MemberJoinRequest;
 import com.portfolio.request.post.PostCreateRequest;
+import com.portfolio.request.post.PostEditRequest;
+import com.portfolio.request.post.PostSearchRequest;
+import com.portfolio.response.post.SinglePostResponse;
 import com.portfolio.service.MemberService;
 import com.portfolio.service.PostService;
 import org.junit.jupiter.api.*;
@@ -14,12 +23,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.MediaType.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -51,6 +64,12 @@ public class PostControllerTest {
     @Autowired
     private MemberUtil memberUtil;
 
+    @Autowired
+    private BoardRepository boardRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
+
     @BeforeEach
     void clear() {
         postRepository.deleteAll();
@@ -58,6 +77,7 @@ public class PostControllerTest {
 
     @BeforeEach
     void insertMember() throws Exception {
+        memberRepository.deleteAll();
 
         memberService.join(MemberJoinRequest.builder()
                 .username("username")
@@ -118,29 +138,231 @@ public class PostControllerTest {
     @Test
     void test3() throws Exception {
 
-//        //given
-//        Member member = memberRepository.findByUsername("username").orElseThrow(MemberNotFoundException::new);
-//
-//        Post post = Post.builder()
-//                .title("제목입니다")
-//                .content("내용입니다")
-//                .member(member)
-//                .build();
-//
-//        postRepository.save(post);
-//
-//        PostResponse postResponse = postService.get(post.getId());
-//
-//        //when
-//        mockMvc.perform(get("/posts/{postId}", post.getId())
-//                        .with(jwt().jwt(jwt -> jwt.subject("username")))
-//                        .contentType(APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.id").value())
-//
-////                .header(AUTH, jwt));
-//
-//        //then
+        //given
+        Member member = memberRepository.findByUsername("username").orElseThrow(MemberNotFoundException::new);
 
+
+        Board board = Board.builder()
+                .boardName("free")
+                .build();
+
+        boardRepository.save(board);
+
+        Post post = Post.builder()
+                .title("제목입니다")
+                .content("내용입니다")
+                .member(member)
+                .board(board)
+                .build();
+
+        postRepository.save(post);
+
+
+        List<Comment> comments = IntStream.range(1, 11).mapToObj(
+                i -> Comment.builder()
+                        .post(post)
+                        .content("내용 " + i)
+                        .member(member)
+                        .build()
+        ).collect(Collectors.toList());
+
+        commentRepository.saveAll(comments);
+
+        System.out.println("============================================");
+        //when
+        mockMvc.perform(get("/board/view?id=free&no=1")
+                        .with(jwt().jwt(jwt -> jwt.subject("username")))
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+
+        //then
+
+    }
+
+    @DisplayName("특정 게시판 페이징 조회")
+    @Test
+    void test6() throws Exception {
+
+        //given
+        Member member = memberRepository.findByUsername("username").orElseThrow(MemberNotFoundException::new);
+
+        Board board = Board.builder()
+                .boardName("free")
+                .build();
+
+        boardRepository.save(board);
+
+        IntStream.rangeClosed(1, 50).forEach(i -> {
+            Post post = Post.builder()
+                    .board(board)
+                    .member(member)
+                    .title("제목입니다 " + i)
+                    .content("내용입니다 " + i)
+                    .build();
+            postRepository.save(post);
+
+            List<Comment> comments = IntStream.rangeClosed(1, i).mapToObj(
+                    o -> Comment.builder()
+                            .post(post)
+                            .content(i + " 번쨰 글 댓글 " + o)
+                            .member(member)
+                            .build()
+            ).collect(Collectors.toList());
+
+            commentRepository.saveAll(comments);
+
+        });
+        System.out.println("==============================================================");
+        //then
+        mockMvc.perform(get("/board/lists?id=free&page=    &list_num=20")
+                        .with(jwt().jwt(jwt -> jwt.subject("username")))
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @DisplayName("글 단건 조회")
+    @Test
+    void test5() throws Exception {
+
+        //given
+        Member member = memberRepository.findByUsername("username").orElseThrow(MemberNotFoundException::new);
+
+        Board board = Board.builder()
+                .boardName("free")
+                .build();
+
+        boardRepository.save(board);
+
+        IntStream.rangeClosed(1, 50).forEach(i -> {
+            Post post = Post.builder()
+                    .board(board)
+                    .member(member)
+                    .title("제목입니다 " + i)
+                    .content("내용입니다 " + i)
+                    .build();
+            postRepository.save(post);
+
+            List<Comment> comments = IntStream.rangeClosed(1, i).mapToObj(
+                    o -> Comment.builder()
+                            .post(post)
+                            .content(i + " 번쨰 글 댓글 " + o)
+                            .member(member)
+                            .build()
+            ).collect(Collectors.toList());
+
+            commentRepository.saveAll(comments);
+
+        });
+
+        System.out.println("============================");
+        //then
+        mockMvc.perform(get("/board/lists?id=free&list_num=a")
+                        .with(jwt().jwt(jwt -> jwt.subject("username")))
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @DisplayName("특정 멤버 작성글 페이징 조회")
+    @Test
+    void test8() throws Exception {
+
+        //given
+        Member member = memberRepository.findByUsername("username").orElseThrow(MemberNotFoundException::new);
+
+        Board board = Board.builder()
+                .boardName("free")
+                .build();
+
+        boardRepository.save(board);
+
+        IntStream.rangeClosed(1, 50).forEach(i -> {
+            Post post = Post.builder()
+                    .board(board)
+                    .member(member)
+                    .title("제목입니다 " + i)
+                    .content("내용입니다 " + i)
+                    .build();
+            postRepository.save(post);
+
+            List<Comment> comments = IntStream.rangeClosed(1, i).mapToObj(
+                    o -> Comment.builder()
+                            .post(post)
+                            .content(i + " 번쨰 글 댓글 " + o)
+                            .member(member)
+                            .build()
+            ).collect(Collectors.toList());
+
+            commentRepository.saveAll(comments);
+
+        });
+
+        System.out.println("============================");
+        //then
+        mockMvc.perform(get("/{username}/post?page=1", member.getUsername())
+                        .with(jwt().jwt(jwt -> jwt.subject("username")))
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @DisplayName("작성글 수정")
+    @Test
+    void test9() throws Exception {
+
+        //given
+        Member member = memberRepository.findByUsername("username")
+                .orElseThrow(MemberNotFoundException::new);
+
+        Board board = Board.builder()
+                .boardName("free")
+                .build();
+
+        boardRepository.save(board);
+
+            Post post = Post.builder()
+                    .board(board)
+                    .member(member)
+                    .title("제목입니다")
+                    .content("내용입니다")
+                    .build();
+
+            postRepository.save(post);
+
+            List<Comment> comments = IntStream.rangeClosed(1, 20).mapToObj(
+                    o -> Comment.builder()
+                            .post(post)
+                            .content(o + " 번쨰 댓글")
+                            .member(member)
+                            .build()
+            ).collect(Collectors.toList());
+
+            commentRepository.saveAll(comments);
+
+
+        PostEditRequest request = PostEditRequest
+                .builder()
+                .title("수정된 제목입니다")
+                .content("수정된 내용입니다")
+                .build();
+
+        String json = objectMapper.writeValueAsString(request);
+
+        System.out.println("============================");
+
+        //then
+        mockMvc.perform(patch("/board/modify?id=free&no=1")
+                        .with(jwt().jwt(jwt -> jwt.subject("username")))
+                        .contentType(APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        Post findPost = postRepository.findById(post.getId()).get();
+        assertEquals("수정된 제목입니다", findPost.getTitle());
+        assertEquals("수정된 내용입니다", findPost.getContent());
     }
 }

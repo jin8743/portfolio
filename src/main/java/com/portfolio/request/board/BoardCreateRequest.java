@@ -21,7 +21,6 @@ public class BoardCreateRequest {
 
         return Board.builder()
                 .boardName(request.getBoardName())
-                .isEnabled(request.getIsEnabled())
                 .build();
     }
 }
