@@ -13,6 +13,13 @@ public class BoardUtil {
     private final BoardRepository boardRepository;
 
     public Board getBoard(String boardName) {
-        return boardRepository.findByBoardName(boardName).orElseThrow(BoardNotFoundException::new);
+        return boardRepository.findByBoardName(boardName)
+                .orElseThrow(BoardNotFoundException::new);
+    }
+
+    public void boardExists(String boardName) {
+        if (!boardRepository.existsByBoardName(boardName)) {
+            throw new BoardNotFoundException();
+        }
     }
 }

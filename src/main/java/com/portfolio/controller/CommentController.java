@@ -2,7 +2,8 @@ package com.portfolio.controller;
 
 import com.portfolio.request.comment.CommentCreateRequest;
 import com.portfolio.request.comment.CommentEditRequest;
-import com.portfolio.response.CommentResponse;
+import com.portfolio.request.member.PageRequest;
+import com.portfolio.response.MemberCommentResponse;
 import com.portfolio.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -25,7 +26,7 @@ public class CommentController {
 
     //단건 조회
     @GetMapping("/comments/{commentId}")
-    public CommentResponse singleComment(@PathVariable Long commentId) {
+    public MemberCommentResponse singleComment(@PathVariable Long commentId) {
         return commentService.get(commentId);
     }
 
@@ -41,9 +42,10 @@ public class CommentController {
         commentService.delete(commentId, authentication.getName());
     }
 
-    //자신이 작성한 댓글 전체 조회
-    @GetMapping("/myPage/comments")
-    public List<CommentResponse> myComments(@RequestParam int page, Authentication authentication) {
-        return commentService.getMyList(page, authentication.getName());
+    /** 특정 멤버 작성 댓글  페이징 조회 */
+    @GetMapping("/{username}/comment")
+    public List<MemberCommentResponse> memberComments(@PathVariable String username,
+                                                      PageRequest request) {
+        return commentService.memberCommentList(username, request);
     }
 }

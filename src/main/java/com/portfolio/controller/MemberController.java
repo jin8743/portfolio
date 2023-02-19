@@ -1,7 +1,8 @@
 package com.portfolio.controller;
 
-import com.portfolio.request.auth.MemberEditRequest;
-import com.portfolio.request.auth.MemberJoinRequest;
+import com.portfolio.request.member.PasswordChangeRequest;
+import com.portfolio.request.member.JoinRequest;
+import com.portfolio.request.member.UnregisterRequest;
 import com.portfolio.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,25 +20,28 @@ public class MemberController {
      * 회원가입
      */
     @PostMapping("/join")
-    public void join(@RequestBody @Validated MemberJoinRequest memberJoinRequest) {
-        memberService.join(memberJoinRequest);
+    public void join(@RequestBody @Validated JoinRequest joinRequest) {
+        memberService.join(joinRequest);
     }
 
-//    @GetMapping("/profile/{username}")
-//    public MemberPostResponse get(@PathVariable String username,
-//                                  @RequestParam(required = false) Integer page) {
-//
-//        memberService.findPost(username, page);
-//    }
-
-
-    @PatchMapping("/myPage/edit")
-    public void update(@RequestBody MemberEditRequest editRequest) {
-        memberService.edit(editRequest);
+    /**
+     * 비밀번호 변경
+     */
+    @PatchMapping("/myInfo/changePasswd")
+    public void update(@RequestBody PasswordChangeRequest editRequest) {
+        memberService.changePassword(editRequest);
     }
 
-    @DeleteMapping("/myPage/unregister")
-    public void unregister() {
-        memberService.delete();
+    /**
+     * 회원 탈퇴
+     */
+    @PatchMapping("/myInfo/unregister")
+    public void unregister(@RequestBody UnregisterRequest request) {
+        memberService.disable(request);
     }
+
+
+    /** 비공계 계정으로 전환 (작성글, 작성댓글 전부 비공개 처리) */
+    @PatchMapping("/myInfo/private")
+    public void
 }

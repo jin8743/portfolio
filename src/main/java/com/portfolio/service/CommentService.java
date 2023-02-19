@@ -8,9 +8,11 @@ import com.portfolio.exception.custom.PostNotFoundException;
 import com.portfolio.repository.comment.CommentRepository;
 import com.portfolio.repository.MemberRepository;
 import com.portfolio.repository.post.PostRepository;
+import com.portfolio.repository.util.MemberUtil;
 import com.portfolio.request.comment.CommentCreateRequest;
 import com.portfolio.request.comment.CommentEditRequest;
-import com.portfolio.response.CommentResponse;
+import com.portfolio.request.member.PageRequest;
+import com.portfolio.response.MemberCommentResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.portfolio.domain.Member.*;
-import static com.portfolio.domain.util.CommentEditor.*;
+import static com.portfolio.domain.editor.CommentEditor.*;
 import static com.portfolio.request.comment.CommentCreateRequest.*;
 
 @Service
@@ -32,14 +34,16 @@ public class CommentService {
 
     private final MemberRepository memberRepository;
 
+    private final MemberUtil memberUtil;
+
     @Transactional
     public void write(Long postId, CommentCreateRequest commentCreate, String username) {
         Comment comment = createComment(postId, commentCreate, username);
         commentRepository.save(comment);
     }
 
-    public CommentResponse get(Long commentId) {
-        return new CommentResponse(findComment(commentId));
+    public MemberCommentResponse get(Long commentId) {
+        return new MemberCommentResponse(findComment(commentId));
     }
 
     @Transactional
@@ -54,10 +58,10 @@ public class CommentService {
         commentRepository.delete(comment);
     }
 
-    public List<CommentResponse> getMyList(int page, String username) {
-        Member member = findMember(username);
-       return commentRepository.getList(page, member).stream().map(CommentResponse::new)
-               .collect(Collectors.toList());
+    public List<MemberCommentResponse> memberCommentList(String username, PageRequest request) {
+        Member member = memberUtil.getMember(username);
+        return commentRepository.getList(request.getPage(), member).stream()
+                .map(MemberCommentResponse::new).collect(Collectors.toList());
     }
 
     private Comment getValidatedComment(Long commentId, String username) {

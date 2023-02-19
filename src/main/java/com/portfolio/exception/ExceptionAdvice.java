@@ -28,7 +28,7 @@ public class ExceptionAdvice {
     }
 
     @ExceptionHandler(DefaultException.class)
-    public ResponseEntity<ErrorResponse> myPortfolioExceptionHandler(DefaultException e) {
+    public ResponseEntity<ErrorResponse> defaultExceptionHandler(DefaultException e) {
         int statusCode = e.getStatusCode();
 
         ErrorResponse body = ErrorResponse.builder()
@@ -37,7 +37,9 @@ public class ExceptionAdvice {
                 .validation(e.getValidation())
                 .build();
 
-        return ResponseEntity.status(statusCode)
+        ResponseEntity<ErrorResponse> response = ResponseEntity.status(statusCode)
                 .body(body);
+
+        return response;
     }
 }

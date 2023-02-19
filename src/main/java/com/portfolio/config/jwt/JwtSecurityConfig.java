@@ -36,6 +36,10 @@ public class JwtSecurityConfig {
                 //토큰을 사용하는 방식이므로 csrf 비활성화
                 .csrf().disable()
 
+                .logout()
+                .logoutUrl("/logout")
+
+                .and()
                 .apply(new MyCustomDsl())
 
                 //세션을 사용하지 않기 떄문에 STATELESS로 설정
@@ -45,7 +49,7 @@ public class JwtSecurityConfig {
 
                 .and()
                 .authorizeRequests()
-                .antMatchers("/login", "/", "/join").permitAll()
+                .antMatchers("/login", "/", "/join", "/logout").permitAll()
                 .anyRequest().authenticated()
 
 

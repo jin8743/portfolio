@@ -12,8 +12,6 @@ import java.util.Map;
 @Getter
 public abstract class DefaultException extends RuntimeException{
 
-    public abstract int getStatusCode();
-
     private final Map<String, String> validation = new HashMap<>();
 
     public DefaultException(String message) {
@@ -23,6 +21,8 @@ public abstract class DefaultException extends RuntimeException{
     public DefaultException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    public abstract int getStatusCode();
 
     public void addValidation(String fieldName, String message) {
         validation.put(fieldName, message);

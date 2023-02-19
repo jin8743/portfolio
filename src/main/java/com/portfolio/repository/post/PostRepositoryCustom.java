@@ -12,6 +12,8 @@ public interface PostRepositoryCustom {
 
     Post findWithId(Long id);
 
+    Post findValidationPost(Long id);
+
     List<Post> boardList(BoardSearchRequest boardSearchRequest);
 
     List<Post> memberList(Member member, int page);

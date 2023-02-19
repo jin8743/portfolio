@@ -23,8 +23,8 @@ public class BoardController {
         return boardService.getList();
     }
 
-    @PostMapping("/admin/create")
-    public void createBoard(@RequestBody BoardCreateRequest request, Authentication authentication) {
-        boardService.create(request, authentication.getName());
+    @PostMapping("/admin/create/board")
+    public void createBoard(@RequestBody BoardCreateRequest request) {
+        boardService.create(request);
     }
 }

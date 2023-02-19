@@ -12,11 +12,8 @@ import java.util.List;
 public class MemberPostResponse {
 
     private final Long postId;
-
     private final String title;
-
     private final Integer totalComments;
-
     private final String boardName;
     private final LocalDateTime lastModifiedDate;
 

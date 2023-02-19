@@ -2,7 +2,7 @@ package com.portfolio.service;
 
 import com.portfolio.domain.Board;
 import com.portfolio.domain.Member;
-import com.portfolio.exception.custom.AuthorizationFailedException;
+import com.portfolio.exception.custom.DuplicateBoardException;
 import com.portfolio.exception.custom.MemberNotFoundException;
 import com.portfolio.repository.MemberRepository;
 import com.portfolio.repository.board.BoardRepository;
@@ -15,14 +15,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.portfolio.domain.Member.*;
+import static com.portfolio.repository.util.MemberUtil.*;
 import static com.portfolio.request.board.BoardCreateRequest.*;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class BoardService {
 
-    private final MemberRepository memberRepository;
     private final BoardRepository boardRepository;
 
     public List<BoardResponse> getList() {
@@ -31,20 +31,17 @@ public class BoardService {
     }
 
     @Transactional
-    public void create(BoardCreateRequest request, String username) {
-        Member member = findMember(username);
-        if (isAdmin(member)) {
-            Board board = toEntity(request);
-            boardRepository.save(board);
-        } else {
-            throw new AuthorizationFailedException();
-        }
+    public void create(BoardCreateRequest request) {
+        isAdmin();
+        validateDuplicate(request.getBoardName());
+        Board board = toBoard(request);
+        boardRepository.save(board);
     }
 
+    private void validateDuplicate(String boardName) {
+        if (boardRepository.existsByBoardName(boardName)) {
+            throw new DuplicateBoardException();
+        }
 
-
-    private Member findMember(String username) {
-        return memberRepository.findByUsername(username)
-                .orElseThrow(MemberNotFoundException::new);
     }
 }

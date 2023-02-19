@@ -27,7 +27,7 @@ public class PostCreateRequest {
         this.content = content;
     }
 
-    public static Post toEntity(PostCreateRequest postCreate, Member member, Board board) {
+    public static Post toPost(PostCreateRequest postCreate, Member member, Board board) {
         return Post.builder()
                 .title(postCreate.getTitle())
                 .content(postCreate.getContent())

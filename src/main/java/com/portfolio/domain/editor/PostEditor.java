@@ -1,4 +1,4 @@
-package com.portfolio.domain.util;
+package com.portfolio.domain.editor;
 
 import com.portfolio.domain.Post;
 import com.portfolio.request.post.PostEditRequest;

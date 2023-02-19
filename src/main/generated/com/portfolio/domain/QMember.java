@@ -26,6 +26,10 @@ public class QMember extends EntityPathBase<Member> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final BooleanPath isEnabled = createBoolean("isEnabled");
+
+    public final BooleanPath isPublic = createBoolean("isPublic");
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> lastModifiedDate = _super.lastModifiedDate;
 

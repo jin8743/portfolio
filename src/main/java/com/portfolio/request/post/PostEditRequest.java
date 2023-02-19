@@ -1,7 +1,5 @@
 package com.portfolio.request.post;
 
-import com.portfolio.domain.Post;
-import com.portfolio.domain.util.PostEditor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;

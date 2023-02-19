@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface BoardRepository extends JpaRepository<Board, Long>, BoardRepositoryCustom {
 
     Optional<Board> findByBoardName(String boardName);
+
+    boolean existsByBoardName(String boardName);
 }

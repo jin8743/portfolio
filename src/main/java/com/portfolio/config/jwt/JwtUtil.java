@@ -77,7 +77,8 @@ public class  JwtUtil {
         String username = claims.getSubject();
 
         CustomUserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        Member member = userDetails.getMember();
+        return new UsernamePasswordAuthenticationToken(userDetails, member, userDetails.getAuthorities());
     }
 
     public boolean validateToken(String token) {

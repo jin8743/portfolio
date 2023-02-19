@@ -1,9 +1,8 @@
 package com.portfolio.domain;
 
-import com.portfolio.domain.util.PostEditor;
+import com.portfolio.domain.editor.PostEditor;
 import com.portfolio.exception.custom.PostNotFoundException;
 import lombok.*;
-import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -21,7 +20,6 @@ public class Post extends BaseEntity{
     private Long id;
 
     private String title;
-
     @Lob
     private String content;
 
@@ -55,6 +53,12 @@ public class Post extends BaseEntity{
     public void edit(PostEditor postEditor) {
         this.title = postEditor.getTitle();
         this.content = postEditor.getContent();
+    }
+
+    public static void checkNull(Post post) {
+        if (post == null) {
+            throw new PostNotFoundException();
+        }
     }
 
 

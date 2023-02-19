@@ -1,4 +1,4 @@
-package com.portfolio.domain.util;
+package com.portfolio.domain.editor;
 
 import com.portfolio.domain.Comment;
 import com.portfolio.request.comment.CommentEditRequest;

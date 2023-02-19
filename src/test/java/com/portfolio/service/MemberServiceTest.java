@@ -3,8 +3,7 @@ package com.portfolio.service;
 import com.portfolio.domain.Member;
 import com.portfolio.exception.custom.InvalidLoginRequestException;
 import com.portfolio.repository.MemberRepository;
-import com.portfolio.request.auth.MemberJoinRequest;
-import org.junit.jupiter.api.Assertions;
+import com.portfolio.request.member.JoinRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,7 +33,7 @@ class MemberServiceTest {
     @Test
     @DisplayName("/join 요청시 DB에 값이 저장된다")
     void test1() {
-        MemberJoinRequest joinRequest = MemberJoinRequest.builder()
+        JoinRequest joinRequest = JoinRequest.builder()
                 .username("username1234")
                 .password("password1234")
                 .build();

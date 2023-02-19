@@ -29,9 +29,21 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .join(post.member, member).fetchJoin()
                 .join(post.board, board).fetchJoin()
                 .join(post.comments, comment).fetchJoin()
+                .join(comment.member, member).fetchJoin()
                 .orderBy(comment.id.desc())
                 .fetchOne();
     }
+
+    @Override
+    public Post findValidationPost(Long postId) {
+        return jpaQueryFactory
+                .selectFrom(post)
+                .where(post.id.eq(postId))
+                .join(post.member, member).fetchJoin()
+                .join(post.board, board).fetchJoin()
+                .fetchOne();
+    }
+
 
     @Override
     public List<Post> boardList(BoardSearchRequest searchRequest) {
@@ -47,9 +59,9 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
     @Override
-    public List<Post> memberList(Member findMember, int page) {
+    public List<Post> memberList(Member member, int page) {
         return jpaQueryFactory.selectFrom(post)
-                .where(post.member.eq(findMember))
+                .where(post.member.eq(member))
                 .join(post.board, board).fetchJoin()
                 .orderBy(post.id.desc())
                 .offset(getOffset(page))

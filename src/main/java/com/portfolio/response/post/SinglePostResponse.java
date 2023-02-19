@@ -1,7 +1,7 @@
 package com.portfolio.response.post;
 
 import com.portfolio.domain.Post;
-import com.portfolio.response.CommentResponse;
+import com.portfolio.response.MemberCommentResponse;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -11,14 +11,14 @@ import java.util.stream.Collectors;
 @Data
 public class SinglePostResponse {
 
+    private final String boardName;
     private final Long postId;
     private final String title;
     private final String writer;
-    private final String content;
-    private final List<CommentResponse> comments;
-    private final Integer totalComments;
-    private final String boardName;
     private final LocalDateTime lastModifiedDate;
+    private final String content;
+    private final Integer totalComments;
+    private final List<MemberCommentResponse> comments;
 
 
 //    @Builder
@@ -36,15 +36,15 @@ public class SinglePostResponse {
 
 
     public SinglePostResponse(Post post) {
+        this.boardName = post.getBoard().getBoardName();
         this.postId = post.getId();
         this.title = post.getTitle();
         this.writer = post.getMember().getUsername();
-        this.content = post.getContent();
-        this.comments = post.getComments().stream()
-                .map(CommentResponse::new)
-                .collect(Collectors.toList());
-        this.totalComments = post.getComments().size();
-        this.boardName = post.getBoard().getBoardName();
         this.lastModifiedDate = post.getLastModifiedDate();
+        this.content = post.getContent();
+        this.totalComments = post.getComments().size();
+        this.comments = post.getComments().stream()
+                .map(MemberCommentResponse::new)
+                .collect(Collectors.toList());
     }
 }

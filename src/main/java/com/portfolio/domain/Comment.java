@@ -1,10 +1,9 @@
 package com.portfolio.domain;
 
-import com.portfolio.domain.util.CommentEditor;
+import com.portfolio.domain.editor.CommentEditor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import javax.persistence.*;
 
@@ -33,6 +32,7 @@ public class Comment extends BaseEntity{
 
     @Builder
     public Comment(Post post, String content, Member member) {
+
         //양방향 연관관계 설정
         this.post = post;
         post.getComments().add(this);

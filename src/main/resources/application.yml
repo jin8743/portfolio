@@ -17,8 +17,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://idp.example.com/issuer
-          jwk-set-uri: https://idp.example.com/.well-known/jwks.json
+          issuer-uri: http://localhost:8080/realms/oauth2
+          jwk-set-uri: http://localhost:8080/realms/oauth2/protocol/openid-connect/certs
 
 
 
@@ -30,3 +30,6 @@ logging:
 jwt:
   #HS256 알고리즘을 사용하여 BASE64로 인코딩된 secret key
   secret: eL/qTd8wU/qxrUe/uebKV3/MW+bL86x7DNCz9zRDze0=
+
+server:
+  port: 8081
