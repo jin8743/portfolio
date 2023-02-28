@@ -22,6 +22,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     @Override
     public Post findWithId(Long postId) {
+
         return jpaQueryFactory
                 .selectDistinct(post)
                 .from(post)
@@ -30,7 +31,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .join(post.board, board).fetchJoin()
                 .join(post.comments, comment).fetchJoin()
                 .join(comment.member, member).fetchJoin()
-                .orderBy(comment.id.desc())
+                .orderBy(comment.id.asc())
                 .fetchOne();
     }
 
@@ -56,11 +57,13 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .offset(searchRequest.getOffset())
                 .limit(searchRequest.getList_num())
                 .fetch();
+
     }
 
     @Override
     public List<Post> memberList(Member member, int page) {
-        return jpaQueryFactory.selectFrom(post)
+        return jpaQueryFactory
+                .selectFrom(post)
                 .where(post.member.eq(member))
                 .join(post.board, board).fetchJoin()
                 .orderBy(post.id.desc())

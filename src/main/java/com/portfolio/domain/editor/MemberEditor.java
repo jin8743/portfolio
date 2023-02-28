@@ -34,7 +34,9 @@ public class MemberEditor {
         member.editPassword(memberEditor);
     }
 
-    public static void unregister(UnregisterRequest request, Member member, PasswordEncoder passwordEncoder) {
+    public static void unregister(UnregisterRequest request, Member member,
+                                  PasswordEncoder passwordEncoder) {
+
         validatePassword(member, request.getPassword(), passwordEncoder);
 
         MemberEditor memberEditor = member.toEditor()

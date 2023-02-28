@@ -11,7 +11,6 @@ public class MemberCommentResponse {
     private final Long commentId;
     private final String content;
     private final String boardName;
-    private final Long postId;
     private final LocalDateTime lastModifiedDate;
 
 
@@ -19,7 +18,6 @@ public class MemberCommentResponse {
         this.commentId = comment.getId();
         this.content = comment.getContent();
         this.boardName = comment.getPost().getBoard().getBoardName();
-        this.postId = comment.getPost().getId();
         this.lastModifiedDate = comment.getLastModifiedDate();
     }
 }
