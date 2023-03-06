@@ -6,12 +6,12 @@ import lombok.Getter;
 import static com.portfolio.exception.custom.CustomNotFoundException.*;
 
 @Getter
-public class SinglePostSearchRequest {
+public class PostIdRequest {
 
     private Long id;
 
 
-    public SinglePostSearchRequest(String id) {
+    public PostIdRequest(String id) {
         this.id = convert(id);
     }
 

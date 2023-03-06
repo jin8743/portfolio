@@ -1,19 +1,17 @@
-package com.portfolio.security.config.auth;
+package com.portfolio.security.service;
 
 import com.portfolio.domain.Member;
-import com.portfolio.exception.custom.InvalidLoginRequestException;
-import com.portfolio.repository.MemberRepository;
+import com.portfolio.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
+
+import static com.portfolio.exception.custom.CustomBadRequestException.*;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final MemberRepository memberRepository;
 
     @Override
-    public CustomUser loadUserByUsername(String usernameOrPassword) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String usernameOrPassword) throws UsernameNotFoundException {
 
         Optional<Member> optionalMember = memberRepository.findByUsername(usernameOrPassword);
 
@@ -32,11 +30,11 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         if (optionalMember.isEmpty()) {
-            throw new InvalidLoginRequestException();
+            throw new UsernameNotFoundException(INVALID_LOGIN_INFO);
         }
         Member member = optionalMember.get();
 
-        return new CustomUser(member, List.of(new SimpleGrantedAuthority(member.getRole().toString())));
+        return new CustomUser(member);
     }
 
 }

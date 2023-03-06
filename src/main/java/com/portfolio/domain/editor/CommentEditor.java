@@ -19,7 +19,6 @@ public class CommentEditor {
         CommentEditor commentEditor = comment.toEditor()
                 .content(commentEdit.getContent())
                 .build();
-
         comment.edit(commentEditor);
     }
 }

@@ -12,6 +12,7 @@ public class BoardPostResponse {
     private final String title;
     private final String username;
     private final Integer totalComments;
+    private final Integer totalLikes;
     private final LocalDateTime lastModifiedDate;
 
     public BoardPostResponse(Post post) {
@@ -19,6 +20,7 @@ public class BoardPostResponse {
         this.title = post.getTitle();
         this.username = post.getMember().getUsername();
         this.totalComments = post.getComments().size();
+        this.totalLikes = post.getLikes();
         this.lastModifiedDate = post.getLastModifiedDate();
     }
 }

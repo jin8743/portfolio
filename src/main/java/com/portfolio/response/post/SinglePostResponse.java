@@ -1,7 +1,9 @@
 package com.portfolio.response.post;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.portfolio.domain.Post;
-import com.portfolio.response.MemberCommentResponse;
+import com.portfolio.response.comment.MemberCommentResponse;
+import com.portfolio.response.comment.PostCommentResponse;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -15,27 +17,17 @@ public class SinglePostResponse {
     private final Long postId;
     private final String title;
     private final String writer;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime lastModifiedDate;
     private final String content;
     private final Integer totalComments;
-    private final List<MemberCommentResponse> comments;
+    private final Integer totalLikes;
+
+    private final Boolean myPost;
+    private final List<PostCommentResponse> comments;
 
 
-//    @Builder
-//    public PostResponse(Long id, String title, String content, List<Comment> comments, Long totalComments, Board board,
-//                        LocalDateTime lastModifiedDate) {
-//
-//        this.id = id;
-//        this.title = title;
-//        this.content = content;
-//        this.comments = comments != null ? comments : new ArrayList<>();
-//        this.totalComments = totalComments;
-//        this.board = board;
-//        this.lastModifiedDate = lastModifiedDate;
-//    }
-
-
-    public SinglePostResponse(Post post) {
+    public SinglePostResponse(Post post, String username) {
         this.boardName = post.getBoard().getBoardName();
         this.postId = post.getId();
         this.title = post.getTitle();
@@ -43,8 +35,10 @@ public class SinglePostResponse {
         this.lastModifiedDate = post.getLastModifiedDate();
         this.content = post.getContent();
         this.totalComments = post.getComments().size();
+        this.totalLikes = post.getLikes();
+        this.myPost = post.getMember().getUsername().equals(username);
         this.comments = post.getComments().stream()
-                .map(MemberCommentResponse::new)
+                .map(PostCommentResponse::new)
                 .collect(Collectors.toList());
     }
 }

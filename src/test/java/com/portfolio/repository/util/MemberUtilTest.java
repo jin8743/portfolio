@@ -1,16 +1,12 @@
 package com.portfolio.repository.util;
 
 import com.portfolio.domain.Member;
-import com.portfolio.domain.MemberRole;
-import com.portfolio.repository.MemberRepository;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import com.portfolio.repository.member.MemberRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ContextConfiguration;
@@ -38,7 +34,6 @@ class MemberUtilTest {
         Member member = Member.builder()
                 .username("username")
                 .password("password1234")
-                .role(ROLE_MEMBER)
                 .build();
         memberRepository.save(member);
 

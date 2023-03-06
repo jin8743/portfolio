@@ -3,16 +3,13 @@ package com.portfolio.service;
 import com.portfolio.domain.Comment;
 import com.portfolio.domain.Member;
 import com.portfolio.domain.Post;
-import com.portfolio.exception.custom.MemberNotFoundException;
-import com.portfolio.exception.custom.PostNotFoundException;
+import com.portfolio.exception.custom.CustomNotFoundException;
 import com.portfolio.repository.comment.CommentRepository;
-import com.portfolio.repository.MemberRepository;
 import com.portfolio.repository.post.PostRepository;
 import com.portfolio.repository.util.MemberUtil;
-import com.portfolio.request.comment.CommentCreateRequest;
-import com.portfolio.request.comment.CommentEditRequest;
+import com.portfolio.request.comment.*;
 import com.portfolio.request.member.PageRequest;
-import com.portfolio.response.MemberCommentResponse;
+import com.portfolio.response.comment.MemberCommentResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,9 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.portfolio.domain.Member.*;
+import static com.portfolio.domain.Comment.*;
 import static com.portfolio.domain.editor.CommentEditor.*;
-import static com.portfolio.request.comment.CommentCreateRequest.*;
+import static com.portfolio.exception.custom.CustomNotFoundException.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -31,63 +28,52 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
-
-    private final MemberRepository memberRepository;
-
     private final MemberUtil memberUtil;
 
-    @Transactional
-    public void write(Long postId, CommentCreateRequest commentCreate, String username) {
-        Comment comment = createComment(postId, commentCreate, username);
-        commentRepository.save(comment);
-    }
 
-    public MemberCommentResponse get(Long commentId) {
-        return new MemberCommentResponse(findComment(commentId));
-    }
 
-    @Transactional
-    public void edit(Long commentId, CommentEditRequest commentEdit, String username) {
-        Comment comment = getValidatedComment(commentId, username);
-        editComment(commentEdit, comment);
-    }
-
-    @Transactional
-    public void delete(Long commentId, String username) {
-        Comment comment = getValidatedComment(commentId, username);
-        commentRepository.delete(comment);
-    }
-
+    //특정 member 작성 댓글 페이징 조회
     public List<MemberCommentResponse> memberCommentList(String username, PageRequest request) {
-        Member member = memberUtil.getMember(username);
-        return commentRepository.getList(request.getPage(), member).stream()
+        Member member = memberUtil.getActiveMember(username);
+        return commentRepository.findByMember(request.getPage(), member).stream()
                 .map(MemberCommentResponse::new).collect(Collectors.toList());
     }
 
-    private Comment getValidatedComment(Long commentId, String username) {
-        Comment comment = findComment(commentId);
-        Member member = findMember(username);
-        return validateComment(comment, member);
+    //단건 작성
+    @Transactional
+    public void writeComment(CommentCreatePostIdRequest postIdRequest, CommentCreateRequest request) {
+        commentRepository.save(createNewComment(postIdRequest, request));
     }
 
-    private Comment createComment(Long postId, CommentCreateRequest commentCreate, String username) {
-        Post post = findPost(postId);
-        Member member = findMember(username);
-        return toEntity(commentCreate, post, member);
+    private Comment createNewComment(CommentCreatePostIdRequest postIdRequest, CommentCreateRequest request) {
+        Member member = memberUtil.getContextMember();
+        Post post = postRepository.findPostById(postIdRequest.getPostId());
+        return createComment(post, member, request.getContent());
     }
 
-    private Member findMember(String username) {
-        return memberRepository.findByUsername(username)
-                .orElseThrow(MemberNotFoundException::new);
+    //대댓글 단건 작성
+    @Transactional
+    public void createChild(ParentCommentIdRequest commentId, CommentCreateRequest request) {
+        commentRepository.save(createNewChildComment(commentId, request));
+    }
+    private Comment createNewChildComment(ParentCommentIdRequest commentId, CommentCreateRequest request) {
+        Member member = memberUtil.getContextMember();
+        Comment parentComment = commentRepository.findCommentWithPostById(commentId.getCommentId())
+                .orElseThrow(() -> new CustomNotFoundException(COMMENT_NOT_FOUND));
+        return createChildComment(member, parentComment, request.getContent());
     }
 
-    private Post findPost(Long postId) {
-        return postRepository.findById(postId)
-                .orElseThrow(PostNotFoundException::new);
+    //단건 수정
+    @Transactional
+    public void edit(EditCommentIdRequest commentId, CommentEditRequest commentEdit) {
+        Comment comment = commentRepository.findCommentWithMemberById(commentId.getId());
+        editComment(commentEdit, comment);
     }
 
-    private Comment findComment(Long commentId) {
-        return commentRepository.findById(commentId)
-                .orElseThrow(PostNotFoundException::new);
+    //단건 삭제
+    @Transactional
+    public void delete(EditCommentIdRequest commentId) {
+        Comment comment = commentRepository.findCommentWithMemberById(commentId.getId());
+        commentRepository.delete(comment);
     }
 }

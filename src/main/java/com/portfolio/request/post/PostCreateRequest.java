@@ -14,25 +14,34 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class PostCreateRequest {
 
-    @NotBlank(message = "제목을 입력해주세요")
-    @Size(max = 30, message = "제목은 30글자 이하로 작성해주세요")
+    @NotBlank(message = "글을 작성할 게시판을 선택하세요")
+    private String boardName;
+
+    @NotBlank(message = "제목을 입력하세요")
+    @Size(max = 30, message = "제목은 30글자 이하로 작성하세요")
     private String title;
 
-    @NotBlank(message = "내용을 입력해주세요")
+    @NotBlank(message = "내용을 입력하세요")
     private String content;
 
+    private Boolean commentsAllowed;
+
     @Builder
-    public PostCreateRequest(String title, String content) {
+    public PostCreateRequest(String boardName, String title, String content, Boolean commentsAllowed) {
+        this.boardName = boardName;
         this.title = title;
         this.content = content;
+        this.commentsAllowed = commentsAllowed == null || commentsAllowed;
     }
 
-    public static Post toPost(PostCreateRequest postCreate, Member member, Board board) {
+    public static Post createPost(Member member, Board board, PostCreateRequest request) {
         return Post.builder()
-                .title(postCreate.getTitle())
-                .content(postCreate.getContent())
-                .board(board)
                 .member(member)
+                .board(board)
+                .title(request.getTitle())
+                .content(request.getContent())
+                .commentsAllowed(request.getCommentsAllowed())
                 .build();
     }
+
 }

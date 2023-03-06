@@ -28,6 +28,8 @@ public class QPost extends EntityPathBase<Post> {
 
     public final ListPath<Comment, QComment> comments = this.<Comment, QComment>createList("comments", Comment.class, QComment.class, PathInits.DIRECT2);
 
+    public final BooleanPath commentsAllowed = createBoolean("commentsAllowed");
+
     public final StringPath content = createString("content");
 
     //inherited
@@ -37,6 +39,8 @@ public class QPost extends EntityPathBase<Post> {
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> lastModifiedDate = _super.lastModifiedDate;
+
+    public final NumberPath<Integer> likes = createNumber("likes", Integer.class);
 
     public final QMember member;
 

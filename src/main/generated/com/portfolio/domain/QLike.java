@@ -32,8 +32,6 @@ public class QLike extends EntityPathBase<Like> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> lastModifiedDate = _super.lastModifiedDate;
 
-    public final BooleanPath liked = createBoolean("liked");
-
     public final QMember member;
 
     public final QPost post;

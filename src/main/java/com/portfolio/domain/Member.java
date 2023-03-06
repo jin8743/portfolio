@@ -1,21 +1,28 @@
 package com.portfolio.domain;
 
-import com.portfolio.domain.editor.member.MemberEditor;
+import com.portfolio.domain.editor.MemberEditor;
 import com.portfolio.exception.custom.AuthenticationFailedException;
-import lombok.AccessLevel;
+import com.portfolio.exception.custom.AuthorizationFailedException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import static com.portfolio.domain.MemberRole.*;
-import static com.portfolio.domain.Post.*;
 import static javax.persistence.GenerationType.IDENTITY;
+import static lombok.AccessLevel.*;
 
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = PROTECTED)
 @Getter
+@SQLDelete(sql = "UPDATE member SET is_enabled = false WHERE member_id=?")
+//@Where(clause = "is_enabled=true")
 public class Member extends BaseEntity{
 
     @Id
@@ -26,41 +33,22 @@ public class Member extends BaseEntity{
     @Column(unique = true)
     private String username;
 
+    @Column(unique = true)
+    private String email;
+
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private MemberRole role;
+    private MemberRole role = ROLE_MEMBER;
 
-    //회원 탈퇴 여부
-    private Boolean isEnabled;
+    private Boolean isEnabled = true;
 
-    //내가 쓴 글, 댓글 공개 여부
-    private Boolean isOpened;
 
     @Builder
-    public Member(String username, String password, MemberRole role,
-                  Boolean isEnabled, Boolean isOpened) {
-
+    public Member(String username, String email, String password) {
         this.username = username;
+        this.email = email;
         this.password = password;
-        this.role = role;
-        this.isEnabled = isEnabled;
-        this.isOpened = isOpened;
-    }
-
-    public static void validatePost(Post post, Member member) {
-        checkNull(post);
-        if (post.getMember() != member) {
-            throw new AuthenticationFailedException();
-        }
-    }
-
-    public static Comment validateComment(Comment comment, Member member) {
-        if (comment.getMember() == member) {
-            return comment;
-        } else {
-            throw new AuthenticationFailedException();
-        }
     }
 
     public MemberEditor.MemberEditorBuilder toEditor() {
@@ -74,15 +62,12 @@ public class Member extends BaseEntity{
         this.password = memberEditor.getPassword();
     }
 
-    public void inactivateMember(MemberEditor memberEditor) {
-        this.isEnabled = memberEditor.getIsEnabled();
-    }
 
-    public void changeToPrivate(MemberEditor memberEditor) {
-        this.isOpened = memberEditor.getIsPrivate();
+    public static Comment isValidComment(Comment comment, Member member) {
+        if (comment.getMember() == member) {
+            return comment;
+        } else {
+            throw new AuthorizationFailedException();
+        }
     }
-    public static Boolean isAdmin(Member member) {
-        return member.getRole().equals(ROLE_ADMIN);
-    }
-
 }

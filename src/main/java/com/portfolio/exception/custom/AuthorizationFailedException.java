@@ -10,10 +10,6 @@ public class AuthorizationFailedException extends DefaultException {
         super(MESSAGE);
     }
 
-    public AuthorizationFailedException(Throwable cause) {
-        super(MESSAGE, cause);
-    }
-
     @Override
     public int getStatusCode() {
         return 403;

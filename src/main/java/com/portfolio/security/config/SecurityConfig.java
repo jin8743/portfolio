@@ -5,22 +5,16 @@ import com.portfolio.security.handler.CustomAccessDeniedHandler;
 import com.portfolio.security.handler.CustomAuthenticationFailureHandler;
 import com.portfolio.security.handler.CustomAuthenticationSuccessHandler;
 import com.portfolio.security.handler.CustomLogoutSuccessHandler;
-import com.portfolio.security.handler.filter.CustomLoginProcessingFilter;
 import com.portfolio.security.provider.CustomAuthenticationProvider;
 import com.portfolio.security.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
@@ -34,7 +28,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @RequiredArgsConstructor
 @EnableWebSecurity
-public class SecurityLoginConfig {
+public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
 
@@ -62,7 +56,6 @@ public class SecurityLoginConfig {
                 .antMatchers("/settings/**").hasRole("MEMBER")
                 .antMatchers("/login").denyAll()
                 .anyRequest().authenticated()
-
 
                 .and()
                 .logout().logoutUrl("/logout")

@@ -1,0 +1,6 @@
+DELETE http://localhost:8080/settings/unregister
+Content-Type: application/json
+
+{
+  "password": "password1234!"
+}

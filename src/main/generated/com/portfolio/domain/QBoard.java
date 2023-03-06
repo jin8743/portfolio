@@ -31,6 +31,8 @@ public class QBoard extends EntityPathBase<Board> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> lastModifiedDate = _super.lastModifiedDate;
 
+    public final StringPath nickname = createString("nickname");
+
     public QBoard(String variable) {
         super(Board.class, forVariable(variable));
     }

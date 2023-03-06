@@ -7,5 +7,7 @@ import java.util.List;
 
 public interface CommentRepositoryCustom {
 
-    List<Comment> getList(int page, Member member);
+    List<Comment> findByMember(int page, Member member);
+
+    Comment findCommentWithChildCommentsById(Long id);
 }

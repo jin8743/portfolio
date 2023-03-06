@@ -1,4 +1,4 @@
-package com.portfolio.config;
+package com.portfolio.security.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.context.annotation.Bean;

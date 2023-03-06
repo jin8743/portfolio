@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
+import static com.portfolio.domain.Post.*;
 import static com.portfolio.domain.QBoard.*;
 import static com.portfolio.domain.QComment.*;
 import static com.portfolio.domain.QMember.*;
@@ -20,44 +21,38 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
 
+    /** 글 단건 조회 */
     @Override
-    public Post findWithId(Long postId) {
+    public Post findAllWithId(Long postId) {
 
-        return jpaQueryFactory
+        Post findPost = jpaQueryFactory
                 .selectDistinct(post)
                 .from(post)
                 .where(post.id.eq(postId))
-                .join(post.member, member).fetchJoin()
-                .join(post.board, board).fetchJoin()
-                .join(post.comments, comment).fetchJoin()
-                .join(comment.member, member).fetchJoin()
+                .leftJoin(post.member, member).fetchJoin()
+                .leftJoin(post.board, board).fetchJoin()
+                .leftJoin(post.comments, comment).fetchJoin()
+                .leftJoin(comment.member, member).fetchJoin()
                 .orderBy(comment.id.asc())
                 .fetchOne();
-    }
 
-    @Override
-    public Post findValidationPost(Long postId) {
-        return jpaQueryFactory
-                .selectFrom(post)
-                .where(post.id.eq(postId))
-                .join(post.member, member).fetchJoin()
-                .join(post.board, board).fetchJoin()
-                .fetchOne();
+        checkNull(findPost);
+        return findPost;
     }
 
 
+    /** 특정 게시판에 작성된 글 페이징 조회 */
     @Override
     public List<Post> boardList(BoardSearchRequest searchRequest) {
         return jpaQueryFactory
                 .selectFrom(post)
-                .where(post.board.boardName.eq(searchRequest.getId()))
-                .join(post.member, member).fetchJoin()
-                .join(post.board, board).fetchJoin()
+                .where(post.board.boardName.eq(searchRequest.getBoard()))
+                .leftJoin(post.member, member).fetchJoin()
+                .leftJoin(post.board, board).fetchJoin()
                 .orderBy(post.id.desc())
                 .offset(searchRequest.getOffset())
                 .limit(searchRequest.getList_num())
                 .fetch();
-
     }
 
     @Override
@@ -70,15 +65,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .offset(getOffset(page))
                 .limit(20)
                 .fetch();
-    }
-
-
-    private BooleanExpression memberEq(Member member) {
-        return member != null ? post.member.eq(member) : null;
-    }
-
-    private BooleanExpression boardEq(Board board) {
-        return board != null ? post.board.eq(board) : null;
     }
 
     // page 에 음수가 들어갔을 경우 예외처리

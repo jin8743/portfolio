@@ -1,5 +1,6 @@
 package com.portfolio.domain;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -28,5 +29,17 @@ public class Like extends BaseEntity{
     @JoinColumn(name = "member_id")
     private Member member;
 
-    private boolean liked;
+
+    @Builder
+    public Like(Post post, Member member) {
+        this.post = post;
+        this.member = member;
+    }
+
+    public static Like createLike(Post post, Member member) {
+        return Like.builder()
+                .post(post)
+                .member(member)
+                .build();
+    }
 }

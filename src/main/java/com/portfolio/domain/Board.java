@@ -1,10 +1,10 @@
 package com.portfolio.domain;
 
-import com.portfolio.exception.custom.BoardNotFoundException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -21,16 +21,16 @@ public class Board extends BaseEntity{
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     private String boardName;
 
+    @Column(unique = true)
+    private String nickname;
+
     @Builder
-    public Board(String boardName) {
+    public Board(String boardName, String nickname) {
         this.boardName = boardName;
+        this.nickname = nickname;
     }
 
-    public static void validateBoard(Board board, String boardName) {
-        if (board.getBoardName().equals(boardName) == false) {
-            throw new BoardNotFoundException();
-        }
-    }
 }

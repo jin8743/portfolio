@@ -5,17 +5,13 @@ import com.portfolio.domain.Post;
 import com.portfolio.request.post.BoardSearchRequest;
 
 import java.util.List;
-import java.util.ListResourceBundle;
 
 public interface PostRepositoryCustom {
 
 
-    Post findWithId(Long id);
-
-    Post findValidationPost(Long id);
+    Post findAllWithId(Long id);
 
     List<Post> boardList(BoardSearchRequest boardSearchRequest);
 
     List<Post> memberList(Member member, int page);
-
 }
