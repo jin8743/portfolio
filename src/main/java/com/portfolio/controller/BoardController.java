@@ -1,13 +1,12 @@
 package com.portfolio.controller;
 
-import com.portfolio.request.board.BoardCreateRequest;
+import com.portfolio.request.board.CreateBoard;
 import com.portfolio.request.validator.board.BoardCreateValidator;
 import com.portfolio.response.BoardResponse;
 import com.portfolio.service.BoardService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -23,7 +22,7 @@ public class BoardController {
     private final BoardService boardService;
     private final BoardCreateValidator boardCreateValidator;
 
-    @InitBinder("boardCreateRequest")
+    @InitBinder("createBoard")
     public void initBinder(WebDataBinder webDataBinder) {
         webDataBinder.addValidators(boardCreateValidator);
     }
@@ -38,11 +37,12 @@ public class BoardController {
         return boardService.getList();
     }
 
+
     /**
      * 게시판 생성
      */
     @PostMapping("/admin/board")
-    public void createBoard(@RequestBody BoardCreateRequest request) {
+    public void createBoard(@Validated @RequestBody CreateBoard request) {
         boardService.create(request);
     }
 }

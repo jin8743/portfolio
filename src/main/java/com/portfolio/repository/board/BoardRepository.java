@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface BoardRepository extends JpaRepository<Board, Long> {
 
 
-    Optional<Board> findByBoardName(String boardName);
+    Board findByBoardName(String boardName);
 
     boolean existsByBoardName(String boardName);
 

@@ -2,14 +2,13 @@ package com.portfolio.response.member;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.portfolio.domain.Member;
-import lombok.Data;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-import static com.fasterxml.jackson.annotation.JsonFormat.*;
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.*;
 
-@Data
+@Getter
 public class MyProfileResponse {
 
     private final String username;

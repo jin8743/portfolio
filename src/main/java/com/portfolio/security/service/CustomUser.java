@@ -21,9 +21,4 @@ public class CustomUser extends User {
                 List.of(new SimpleGrantedAuthority(member.getRole().toString())));
         this.member = member;
     }
-
-//    public CustomUser(Member member) {
-//        super(member.getUsername(), member.getPassword(), List.of(new SimpleGrantedAuthority(member.getRole().toString())));
-//        this.member = member;
-//    }
 }

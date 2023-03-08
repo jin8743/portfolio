@@ -1,7 +1,7 @@
 package com.portfolio.domain.editor;
 
 import com.portfolio.domain.Post;
-import com.portfolio.request.post.PostEditRequest;
+import com.portfolio.request.post.EditPost;
 import lombok.Builder;
 import lombok.Data;
 
@@ -18,7 +18,7 @@ public class PostEditor {
         this.commentsAllowed = commentsAllowed;
     }
 
-    public static void editPost(PostEditRequest postEdit, Post post) {
+    public static void editPost(EditPost postEdit, Post post) {
         PostEditor postEditor = post.toEditor()
                 .title(postEdit.getTitle())
                 .content(postEdit.getContent())
@@ -30,7 +30,7 @@ public class PostEditor {
 
 
     /** 댓글작성을 허용할지 여부에 대한 변경 요청 정보가 없을 경우 기존 방식 유지 */
-    private static Boolean getCommentsAllowed(PostEditRequest request, Post post) {
+    private static Boolean getCommentsAllowed(EditPost request, Post post) {
         return request.getCommentsAllowed() == null ?
                 post.getCommentsAllowed() : request.getCommentsAllowed();
     }

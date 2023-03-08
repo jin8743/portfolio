@@ -12,7 +12,7 @@ import javax.validation.constraints.Size;
 
 @Data
 @NoArgsConstructor
-public class PostCreateRequest {
+public class CreatePost {
 
     @NotBlank(message = "글을 작성할 게시판을 선택하세요")
     private String boardName;
@@ -27,14 +27,14 @@ public class PostCreateRequest {
     private Boolean commentsAllowed;
 
     @Builder
-    public PostCreateRequest(String boardName, String title, String content, Boolean commentsAllowed) {
+    public CreatePost(String boardName, String title, String content, Boolean commentsAllowed) {
         this.boardName = boardName;
         this.title = title;
         this.content = content;
         this.commentsAllowed = commentsAllowed == null || commentsAllowed;
     }
 
-    public static Post createPost(Member member, Board board, PostCreateRequest request) {
+    public static Post createPost(Member member, Board board, CreatePost request) {
         return Post.builder()
                 .member(member)
                 .board(board)

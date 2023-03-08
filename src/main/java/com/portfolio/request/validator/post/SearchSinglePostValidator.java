@@ -1,8 +1,8 @@
 package com.portfolio.request.validator.post;
 
 import com.portfolio.exception.custom.CustomNotFoundException;
-import com.portfolio.repository.board.BoardRepository;
-import com.portfolio.request.post.BoardSearchRequest;
+import com.portfolio.repository.post.PostRepository;
+import com.portfolio.request.post.SearchSinglePost;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
@@ -12,21 +12,21 @@ import static com.portfolio.exception.custom.CustomNotFoundException.*;
 
 @Component
 @RequiredArgsConstructor
-public class BoardSearchValidator implements Validator {
+public class SearchSinglePostValidator implements Validator {
 
-    private final BoardRepository boardRepository;
+    private final PostRepository postRepository;
 
     @Override
     public boolean supports(Class<?> clazz) {
-        return clazz.isAssignableFrom(BoardSearchRequest.class);
+        return clazz.isAssignableFrom(SearchSinglePost.class);
     }
 
     @Override
     public void validate(Object target, Errors errors) {
-        BoardSearchRequest request = (BoardSearchRequest) target;
-        if (boardRepository
-                .existsByBoardName(request.getBoard()) == false) {
-            throw new CustomNotFoundException(BOARD_NOT_FOUND);
+        SearchSinglePost request = (SearchSinglePost) target;
+
+        if (postRepository.existsById(request.getId()) == false) {
+            throw new CustomNotFoundException(POST_NOT_FOUND);
         }
     }
 }

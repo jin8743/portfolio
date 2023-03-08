@@ -3,12 +3,11 @@ package com.portfolio.service;
 import com.portfolio.domain.Comment;
 import com.portfolio.domain.Member;
 import com.portfolio.domain.Post;
-import com.portfolio.exception.custom.CustomNotFoundException;
 import com.portfolio.repository.comment.CommentRepository;
 import com.portfolio.repository.post.PostRepository;
 import com.portfolio.repository.util.MemberUtil;
 import com.portfolio.request.comment.*;
-import com.portfolio.request.member.PageRequest;
+import com.portfolio.request.common.Page;
 import com.portfolio.response.comment.MemberCommentResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,7 @@ import java.util.stream.Collectors;
 
 import static com.portfolio.domain.Comment.*;
 import static com.portfolio.domain.editor.CommentEditor.*;
-import static com.portfolio.exception.custom.CustomNotFoundException.*;
+import static com.portfolio.repository.util.MemberUtil.getAuthenticatedUsername;
 
 @Service
 @Transactional(readOnly = true)
@@ -33,47 +32,48 @@ public class CommentService {
 
 
     //특정 member 작성 댓글 페이징 조회
-    public List<MemberCommentResponse> memberCommentList(String username, PageRequest request) {
+    public List<MemberCommentResponse> findCommentsByMember(String username, Page request) {
         Member member = memberUtil.getActiveMember(username);
-        return commentRepository.findByMember(request.getPage(), member).stream()
-                .map(MemberCommentResponse::new).collect(Collectors.toList());
+        return commentRepository.findCommentsByMember(request.getPage(), member).stream()
+                .map(MemberCommentResponse::new)
+                .collect(Collectors.toList());
     }
 
     //단건 작성
     @Transactional
-    public void writeComment(CommentCreatePostIdRequest postIdRequest, CommentCreateRequest request) {
-        commentRepository.save(createNewComment(postIdRequest, request));
+    public void writeComment(CreateComment request) {
+        commentRepository.save(createNewComment(request));
     }
 
-    private Comment createNewComment(CommentCreatePostIdRequest postIdRequest, CommentCreateRequest request) {
+    private Comment createNewComment(CreateComment request) {
         Member member = memberUtil.getContextMember();
-        Post post = postRepository.findPostById(postIdRequest.getPostId());
-        return createComment(post, member, request.getContent());
+        Post post = postRepository.findPostById(request.getPostId());
+        return createComment(post, member, null, request.getContent());
     }
 
     //대댓글 단건 작성
     @Transactional
-    public void createChild(ParentCommentIdRequest commentId, CommentCreateRequest request) {
-        commentRepository.save(createNewChildComment(commentId, request));
+    public void writeChildComment(CreateChildComment request) {
+        commentRepository.save(createNewChildComment(request));
     }
-    private Comment createNewChildComment(ParentCommentIdRequest commentId, CommentCreateRequest request) {
+
+    private Comment createNewChildComment(CreateChildComment request) {
         Member member = memberUtil.getContextMember();
-        Comment parentComment = commentRepository.findCommentWithPostById(commentId.getCommentId())
-                .orElseThrow(() -> new CustomNotFoundException(COMMENT_NOT_FOUND));
-        return createChildComment(member, parentComment, request.getContent());
+        Comment parentComment = commentRepository.findCommentWithPostById(request.getParentCommentId());
+        return createComment(null, member, parentComment, request.getContent());
     }
 
     //단건 수정
     @Transactional
-    public void edit(EditCommentIdRequest commentId, CommentEditRequest commentEdit) {
-        Comment comment = commentRepository.findCommentWithMemberById(commentId.getId());
-        editComment(commentEdit, comment);
+    public void edit(EditComment request) {
+        Comment comment = commentRepository.findCommentWithMemberById(request.getCommentId());
+        editComment(request, comment);
     }
 
     //단건 삭제
     @Transactional
-    public void delete(EditCommentIdRequest commentId) {
-        Comment comment = commentRepository.findCommentWithMemberById(commentId.getId());
+    public void delete(DeleteComment request) {
+        Comment comment = commentRepository.findCommentWithMemberById(request.getId());
         commentRepository.delete(comment);
     }
 }

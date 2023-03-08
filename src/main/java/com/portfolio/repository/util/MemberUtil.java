@@ -26,7 +26,7 @@ public class MemberUtil {
         }
     }
 
-    public String getCurrentUsername() {
+    public static String getAuthenticatedUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null ? authentication.getName() : "";
     }

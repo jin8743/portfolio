@@ -4,14 +4,14 @@ import com.portfolio.domain.Comment;
 import com.portfolio.exception.custom.AuthorizationFailedException;
 import com.portfolio.exception.custom.CustomNotFoundException;
 import com.portfolio.repository.comment.CommentRepository;
-import com.portfolio.request.comment.DeleteCommentIdRequest;
+import com.portfolio.request.comment.DeleteComment;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 import static com.portfolio.exception.custom.CustomNotFoundException.*;
+import static com.portfolio.repository.util.MemberUtil.getAuthenticatedUsername;
 
 @RequiredArgsConstructor
 @Component
@@ -21,12 +21,12 @@ public class DeleteCommentValidator implements Validator {
 
     @Override
     public boolean supports(Class<?> clazz) {
-        return clazz.isAssignableFrom(DeleteCommentIdRequest.class);
+        return clazz.isAssignableFrom(DeleteComment.class);
     }
 
     @Override
     public void validate(Object target, Errors errors) {
-        DeleteCommentIdRequest request = (DeleteCommentIdRequest) target;
+        DeleteComment request = (DeleteComment) target;
         Comment comment = commentRepository.findCommentWithMemberById(request.getId());
 
         if (comment == null) {
@@ -36,10 +36,5 @@ public class DeleteCommentValidator implements Validator {
                 .equals(getAuthenticatedUsername()) == false) {
             throw new AuthorizationFailedException();
         }
-    }
-
-    private String getAuthenticatedUsername() {
-        return SecurityContextHolder.getContext()
-                .getAuthentication().getName();
     }
 }

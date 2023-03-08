@@ -7,13 +7,13 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 @Getter
 @NoArgsConstructor
-public class UnregisterRequest {
+public class Unregister {
 
     @NotBlank(message = "비밀번호를 입력해주세요")
     private String password;
 
     @Builder
-    public UnregisterRequest(String password) {
+    public Unregister(String password) {
         this.password = password;
     }
 }

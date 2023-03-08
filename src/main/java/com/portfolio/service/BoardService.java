@@ -1,9 +1,7 @@
 package com.portfolio.service;
 
-import com.portfolio.domain.Board;
-import com.portfolio.exception.custom.CustomBadRequestException;
 import com.portfolio.repository.board.BoardRepository;
-import com.portfolio.request.board.BoardCreateRequest;
+import com.portfolio.request.board.CreateBoard;
 import com.portfolio.response.BoardResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -13,9 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.portfolio.exception.custom.CustomBadRequestException.*;
-import static com.portfolio.repository.util.MemberUtil.*;
-import static com.portfolio.request.board.BoardCreateRequest.*;
+import static com.portfolio.request.board.CreateBoard.*;
 
 @Service
 @RequiredArgsConstructor
@@ -31,16 +27,7 @@ public class BoardService {
     }
 
     @Transactional
-    public void create(BoardCreateRequest request) {
-        validateDuplicate(request.getBoardName());
-        Board board = toBoard(request);
-        boardRepository.save(board);
-    }
-
-    private void validateDuplicate(String boardName) {
-        if (boardRepository.existsByBoardName(boardName)) {
-            throw new CustomBadRequestException(DUPLICATED_BOARDNAME);
-        }
-
+    public void create(CreateBoard request) {
+        boardRepository.save(createNewBoard(request));
     }
 }

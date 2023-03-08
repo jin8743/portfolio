@@ -17,8 +17,6 @@ public abstract class DefaultException extends RuntimeException {
     public DefaultException(String message) {
         super(message);
     }
-
-
     public abstract int getStatusCode();
 
 

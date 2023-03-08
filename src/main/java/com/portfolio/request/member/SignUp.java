@@ -10,7 +10,7 @@ import javax.validation.constraints.Pattern;
 @Getter
 @Setter
 @NoArgsConstructor
-public class SignUpRequest {
+public class SignUp {
 
     @NotBlank(message = "아이디를 입력해주세요")
     @Pattern(regexp="[a-zA-Z0-9]{3,20}",
@@ -26,17 +26,18 @@ public class SignUpRequest {
             message = "비밀번호는 영어, 숫자, 특수문자를 포함해서 8~20자리 이내로 입력해주세요.")
     private String password;
 
+    @NotBlank(message = "비밀번호를 한번 더 입력해주세요")
     private String passwordConfirm;
 
     @Builder
-    public SignUpRequest(String username, String email, String password, String passwordConfirm) {
+    public SignUp(String username, String email, String password, String passwordConfirm) {
         this.username = username;
         this.email = email;
         this.password = password;
         this.passwordConfirm = passwordConfirm;
     }
 
-    public static Member createNewMember(SignUpRequest request) {
+    public static Member createNewMember(SignUp request) {
         return Member.builder()
                 .username(request.username)
                 .email(request.getEmail())

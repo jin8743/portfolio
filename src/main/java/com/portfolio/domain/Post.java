@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.portfolio.exception.custom.CustomNotFoundException.*;
+import static javax.persistence.CascadeType.*;
 import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.*;
 
@@ -27,7 +28,7 @@ public class Post extends BaseEntity{
     @JoinColumn(name = "member_id")
     private  Member member;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
     private Boolean commentsAllowed = true;

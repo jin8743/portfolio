@@ -2,10 +2,11 @@ package com.portfolio.response.post;
 
 import com.portfolio.domain.Post;
 import lombok.Data;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
 public class BoardPostResponse {
 
     private final Long postId;

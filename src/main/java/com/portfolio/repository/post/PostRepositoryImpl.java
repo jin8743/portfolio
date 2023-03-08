@@ -1,8 +1,7 @@
 package com.portfolio.repository.post;
 
 import com.portfolio.domain.*;
-import com.portfolio.request.post.BoardSearchRequest;
-import com.querydsl.core.types.dsl.BooleanExpression;
+import com.portfolio.request.post.SearchPostsByBoard;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
@@ -13,7 +12,6 @@ import static com.portfolio.domain.QBoard.*;
 import static com.portfolio.domain.QComment.*;
 import static com.portfolio.domain.QMember.*;
 import static com.portfolio.domain.QPost.*;
-import static java.lang.Math.*;
 
 @RequiredArgsConstructor
 public class PostRepositoryImpl implements PostRepositoryCustom {
@@ -23,9 +21,9 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     /** 글 단건 조회 */
     @Override
-    public Post findAllWithId(Long postId) {
+    public Post findSinglePostWithId(Long postId) {
 
-        Post findPost = jpaQueryFactory
+        return jpaQueryFactory
                 .selectDistinct(post)
                 .from(post)
                 .where(post.id.eq(postId))
@@ -33,17 +31,14 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .leftJoin(post.board, board).fetchJoin()
                 .leftJoin(post.comments, comment).fetchJoin()
                 .leftJoin(comment.member, member).fetchJoin()
-                .orderBy(comment.id.asc())
+//                .leftJoin(comment.parent).fetchJoin()
                 .fetchOne();
-
-        checkNull(findPost);
-        return findPost;
     }
 
 
     /** 특정 게시판에 작성된 글 페이징 조회 */
     @Override
-    public List<Post> boardList(BoardSearchRequest searchRequest) {
+    public List<Post> findPostsByBoard(SearchPostsByBoard searchRequest) {
         return jpaQueryFactory
                 .selectFrom(post)
                 .where(post.board.boardName.eq(searchRequest.getBoard()))
@@ -51,12 +46,13 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .leftJoin(post.board, board).fetchJoin()
                 .orderBy(post.id.desc())
                 .offset(searchRequest.getOffset())
-                .limit(searchRequest.getList_num())
+                .limit(searchRequest.getSize())
                 .fetch();
     }
 
+    /** 특정 member 가 작성한 글 페이징 조회 */
     @Override
-    public List<Post> memberList(Member member, int page) {
+    public List<Post> findPostsByMember(Member member, int page) {
         return jpaQueryFactory
                 .selectFrom(post)
                 .where(post.member.eq(member))
@@ -67,9 +63,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .fetch();
     }
 
-    // page 에 음수가 들어갔을 경우 예외처리
     private Long getOffset(int page) {
-        return (max(page, 1) - 1) * 20L;
+        return (page - 1) * 20L;
     }
-
 }

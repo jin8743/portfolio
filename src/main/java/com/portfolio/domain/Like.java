@@ -29,7 +29,6 @@ public class Like extends BaseEntity{
     @JoinColumn(name = "member_id")
     private Member member;
 
-
     @Builder
     public Like(Post post, Member member) {
         this.post = post;

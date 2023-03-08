@@ -1,6 +1,6 @@
 package com.portfolio.controller;
 
-import com.portfolio.request.member.SignUpRequest;
+import com.portfolio.request.member.SignUp;
 import com.portfolio.request.validator.member.SignUpValidator;
 import com.portfolio.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ public class MemberController {
 
     private final SignUpValidator signUpValidator;
 
-    @InitBinder("signUpRequest")
+    @InitBinder("signUp")
     public void initBinder(WebDataBinder webDataBinder) {
         webDataBinder.addValidators(signUpValidator);
     }
@@ -27,7 +27,7 @@ public class MemberController {
      * 회원가입
      */
     @PostMapping("/join")
-    public void signUp(@RequestBody @Validated SignUpRequest signUpRequest) {
-        memberService.saveNewMember(signUpRequest);
+    public void signUp(@RequestBody @Validated SignUp signUp) {
+        memberService.saveNewMember(signUp);
     }
 }

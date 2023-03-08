@@ -9,6 +9,7 @@ import com.portfolio.security.provider.CustomAuthenticationProvider;
 import com.portfolio.security.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
@@ -26,12 +27,13 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import static org.springframework.http.HttpMethod.*;
+
 @RequiredArgsConstructor
 @EnableWebSecurity
 public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
-
     private final PasswordEncoder passwordEncoder;
     private final CustomUserDetailsService userDetailsService;
 
@@ -52,7 +54,8 @@ public class SecurityConfig {
                 .formLogin().disable()
 
                 .authorizeRequests()
-                .antMatchers("/join", "/board/**", "/member/**", "/api/login").permitAll()
+                .antMatchers("/join", "/api/login").permitAll()
+                .antMatchers(GET, "/member/**", "/posts/**").permitAll()
                 .antMatchers("/settings/**").hasRole("MEMBER")
                 .antMatchers("/login").denyAll()
                 .anyRequest().authenticated()
@@ -65,7 +68,8 @@ public class SecurityConfig {
                 .authenticationEntryPoint(authenticationEntryPoint())
                 .accessDeniedHandler(accessDeniedHandler())
 
-                .and().csrf().disable()
+//                .and().csrf().disable()
+                .and()
                 .cors()
                 .configurationSource(corsConfigurationSource());
 

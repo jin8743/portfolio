@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -37,6 +38,7 @@ public class ExceptionAdvice {
         return response;
     }
 
+    /** 400 */
     @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ErrorResponse exceptionHandler(MethodArgumentNotValidException e) {
@@ -59,6 +61,7 @@ public class ExceptionAdvice {
         return response;
     }
 
+    /** 415 */
     @ResponseStatus(UNSUPPORTED_MEDIA_TYPE)
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public ErrorResponse exceptionHandler(HttpMediaTypeNotSupportedException e) {
@@ -69,6 +72,7 @@ public class ExceptionAdvice {
         return response;
     }
 
+    /** 405 */
     @ResponseStatus(METHOD_NOT_ALLOWED)
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ErrorResponse exceptionHandler(HttpRequestMethodNotSupportedException e) {

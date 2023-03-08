@@ -14,7 +14,7 @@ public class BoardFactory {
     public Board createBoard(String boardName) {
         Board board = Board.builder()
                 .boardName(boardName)
-                .nickname("자유게시판")
+                .nickname("자유게시판 " + boardName)
                 .build();
         boardRepository.save(board);
         return board;

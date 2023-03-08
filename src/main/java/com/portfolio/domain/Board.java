@@ -9,6 +9,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static javax.persistence.GenerationType.*;
 import static lombok.AccessLevel.*;
 
@@ -24,6 +27,7 @@ public class Board extends BaseEntity{
     @Column(unique = true)
     private String boardName;
 
+    //TODO 닉네임 설정
     @Column(unique = true)
     private String nickname;
 

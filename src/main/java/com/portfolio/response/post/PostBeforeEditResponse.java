@@ -2,8 +2,9 @@ package com.portfolio.response.post;
 
 import com.portfolio.domain.Post;
 import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class PostBeforeEditResponse {
 
     private final Long postId;

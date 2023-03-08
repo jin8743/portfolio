@@ -1,7 +1,7 @@
 package com.portfolio.domain.editor;
 
 import com.portfolio.domain.Comment;
-import com.portfolio.request.comment.CommentEditRequest;
+import com.portfolio.request.comment.EditComment;
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,7 +15,7 @@ public class CommentEditor {
         this.content = content;
     }
 
-    public static void editComment(CommentEditRequest commentEdit, Comment comment) {
+    public static void editComment(EditComment commentEdit, Comment comment) {
         CommentEditor commentEditor = comment.toEditor()
                 .content(commentEdit.getContent())
                 .build();

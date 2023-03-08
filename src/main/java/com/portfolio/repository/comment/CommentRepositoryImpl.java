@@ -20,33 +20,20 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public List<Comment> findByMember(int page, Member member) {
+    public List<Comment> findCommentsByMember(int page, Member member) {
         return jpaQueryFactory
                 .selectFrom(comment)
                 .where(comment.member.eq(member))
                 .leftJoin(comment.post, post).fetchJoin()
                 .leftJoin(post.board, board).fetchJoin()
+                .leftJoin(comment.parent).fetchJoin()
                 .orderBy(comment.id.desc())
                 .offset(getOffset(page))
                 .limit(20)
                 .fetch();
     }
 
-    @Override
-    public Comment findCommentWithChildCommentsById(Long id) {
-
-        return jpaQueryFactory
-                .selectFrom(comment)
-                .where(comment.id.eq(id))
-                .leftJoin(comment.childs).fetchJoin()
-                .leftJoin(comment.post, post).fetchJoin()
-                .fetchOne();
-    }
-
-
     private Long getOffset(int page) {
-        return (max(page, 1) - 1) * 20L;
+        return (page - 1) * 20L;
     }
-
-
 }

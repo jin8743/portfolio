@@ -1,8 +1,9 @@
 package com.portfolio.controller;
 
-import com.portfolio.request.member.PasswordChangeRequest;
-import com.portfolio.request.member.UnregisterRequest;
-import com.portfolio.request.validator.member.PasswordChangeValidator;
+import com.portfolio.request.member.ChangePassword;
+import com.portfolio.request.member.Unregister;
+import com.portfolio.request.validator.member.ChangePasswordValidator;
+import com.portfolio.request.validator.member.UnregisterValidator;
 import com.portfolio.response.member.MyProfileResponse;
 import com.portfolio.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,6 @@ import static com.portfolio.controller.SettingsController.SETTINGS;
 
 @RestController
 @RequestMapping(ROOT + SETTINGS)
-
 @RequiredArgsConstructor
 public class SettingsController {
 
@@ -24,19 +24,28 @@ public class SettingsController {
     static final String PASSWORD = "/password";
     static final String PROFILE = "/profile";
     static final String UNREGISTER = "/unregister";
+
     private final MemberService memberService;
 
+    private final ChangePasswordValidator changePasswordValidator;
 
-    @InitBinder("passwordChangeRequest")
+    private final UnregisterValidator unregisterValidator;
+
+    @InitBinder("changePassword")
     public void initBinder(WebDataBinder webDataBinder) {
-        webDataBinder.addValidators(new PasswordChangeValidator());
+        webDataBinder.addValidators(changePasswordValidator);
+    }
+
+    @InitBinder("unregister")
+    public void initBinder2(WebDataBinder webDataBinder) {
+        webDataBinder.addValidators(unregisterValidator);
     }
 
     /**
      * 비밀번호 변경
      */
     @PatchMapping(PASSWORD)
-    public void updatePassword(@RequestBody @Validated PasswordChangeRequest request) {
+    public void updatePassword(@Validated @RequestBody ChangePassword request) {
         memberService.updatePassword(request);
     }
 
@@ -44,8 +53,8 @@ public class SettingsController {
      * 회원 탈퇴
      */
     @DeleteMapping(UNREGISTER)
-    public void unregister(@RequestBody UnregisterRequest request) {
-        memberService.softDelete(request);
+    public void unregister(@Validated @RequestBody Unregister request) {
+        memberService.unregister();
     }
 
     /**
@@ -55,5 +64,4 @@ public class SettingsController {
     public MyProfileResponse loadMyProfile() {
         return memberService.loadMyProfile();
     }
-
 }

@@ -3,12 +3,13 @@ package com.portfolio.response.post;
 import com.portfolio.domain.Member;
 import com.portfolio.domain.Post;
 import lombok.Data;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
 public class MemberPostResponse {
 
     private final Long postId;
