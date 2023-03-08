@@ -2,7 +2,6 @@ package com.portfolio.service;
 
 import com.portfolio.domain.Board;
 import com.portfolio.repository.board.BoardRepository;
-import com.portfolio.repository.comment.CommentRepository;
 import com.portfolio.repository.like.LikeRepository;
 import com.portfolio.repository.util.MemberUtil;
 import com.portfolio.domain.Member;
@@ -11,8 +10,8 @@ import com.portfolio.repository.post.PostRepository;
 import com.portfolio.request.common.Page;
 import com.portfolio.request.post.*;
 import com.portfolio.response.post.BoardPostResponse;
+import com.portfolio.response.post.MyLikedPostResponse;
 import com.portfolio.response.post.MemberPostResponse;
-import com.portfolio.response.post.PostBeforeEditResponse;
 import com.portfolio.response.post.SinglePostResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,7 +22,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.portfolio.domain.editor.PostEditor.editPost;
-import static com.portfolio.repository.util.MemberUtil.*;
 import static com.portfolio.request.post.CreatePost.createPost;
 
 @Service
@@ -51,11 +49,9 @@ public class PostService {
 
     /** 조회 기능 */
     //단건 조회
-    //TODO  내 댓글인지 여부 추가
-
     public SinglePostResponse findSinglePost(SearchSinglePost request) {
-        Post post = postRepository.findSinglePostWithId(request.getId());
-        return new SinglePostResponse(post, getAuthenticatedUsername());
+        Post post = postRepository.findPostWithMemberAndBoardById(request.getId());
+        return new SinglePostResponse(post);
     }
 
     //특정 게시판 글 페이징 조회
@@ -65,13 +61,28 @@ public class PostService {
                .collect(Collectors.toList());
     }
 
-    //특정 member 작성글 페이징 조회
+    //특정 회원의 작성글 페이징 조회
     public List<MemberPostResponse> findPostsByMember(String username, Page request) {
-        Member member = memberUtil.getActiveMember(username);
-        List<Post> posts = postRepository.findPostsByMember(member, request.getPage());
+        List<Post> posts = loadPostsByMember(username, request);
         return posts.isEmpty() ? new ArrayList<>() : posts.stream().map(MemberPostResponse::new)
                 .collect(Collectors.toList());
     }
+
+    private List<Post> loadPostsByMember(String username, Page request) {
+        Member member = memberUtil.getActiveMember(username);
+        List<Post> posts = postRepository.findPostsByMember(member, request.getPage());
+        return posts;
+    }
+
+
+    //내가 좋아요 누른글 페이징 조회
+    /*** 좋아요 누른 본인만 확인 가능함. 타인이 조회 시도시 인가 예외 발생*/
+    public List<MyLikedPostResponse> findMyLikedPosts(Page request) {
+        List<Post> posts = likeRepository.findMyLikedPosts(request.getPage());
+        return posts.isEmpty() ? new ArrayList<>() : posts.stream().map(MyLikedPostResponse::new)
+                .collect(Collectors.toList());
+    }
+
 
     /** 수정 기능 */
 

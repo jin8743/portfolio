@@ -2,6 +2,7 @@ package com.portfolio.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.portfolio.controller.factory.BoardFactory;
+import com.portfolio.controller.factory.LikeFactory;
 import com.portfolio.controller.factory.MemberFactory;
 import com.portfolio.controller.factory.PostFactory;
 import com.portfolio.domain.Board;
@@ -9,6 +10,7 @@ import com.portfolio.domain.Member;
 import com.portfolio.repository.board.BoardRepository;
 import com.portfolio.repository.comment.CommentRepository;
 import com.portfolio.domain.Post;
+import com.portfolio.repository.like.LikeRepository;
 import com.portfolio.repository.member.MemberRepository;
 import com.portfolio.repository.post.PostRepository;
 import com.portfolio.request.member.SignUp;
@@ -37,33 +39,51 @@ public class PostControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
     @Autowired
     private ObjectMapper objectMapper;
+
     @Autowired
     private PostRepository postRepository;
+
     @Autowired
     private MemberRepository memberRepository;
+
     @Autowired
     private BoardRepository boardRepository;
+
+    @Autowired
+    private LikeRepository likeRepository;
+
     @Autowired
     private CommentRepository commentRepository;
+
     @Autowired
     private MemberFactory memberFactory;
+
     @Autowired
     private BoardFactory boardFactory;
+
     @Autowired
     private PostFactory postFactory;
+
+    @Autowired
+    private LikeFactory likeFactory;
 
 
     @AfterEach
     void clear() {
+        likeRepository.deleteAll();
         commentRepository.deleteAll();
         postRepository.deleteAll();
         boardRepository.deleteAll();
         memberRepository.deleteAll();
     }
 
-    /** 글 단건 작성 */
+    /**
+     * 글 단건 작성
+     */
+
     @DisplayName("글 작성 (댓글 작성 허용)")
     @Test
     void test1() throws Exception {
@@ -444,7 +464,10 @@ public class PostControllerTest {
 
 
 
-    /** 글 단건 조회 */
+    /** 글 단건 조회
+     * (글에 댓글과 좋아요가 없는 경우)
+     */
+
     @DisplayName("글 단건 조회")
     @Test
     void test14() throws Exception {
@@ -540,17 +563,19 @@ public class PostControllerTest {
 
 
 
+    /**
+     * 특정 게시판에 작성된 글 페이징 조회
+     * (글에 댓글이 없는 경우)
+     */
 
-    /** 특정 게시판에 작성된 글 페이징 조회 */
-    @DisplayName("특정 게시판에 작성된 글 여러개 조회")
+    @DisplayName("특정 게시판에 작성된 글 페이징 조회")
     @Test
     void test17() throws Exception {
         //given
         Board board = boardFactory.createBoard("free");
         IntStream.rangeClosed(1, 30).forEach(i -> {
             Member member = memberFactory.createMember("member " + i);
-            Post post = postFactory.createPost(member, board, true);
-            postRepository.save(post);
+            postFactory.createPost(member, board, true);
         });
 
         //then
@@ -595,8 +620,7 @@ public class PostControllerTest {
         Board board = boardFactory.createBoard("free");
         IntStream.rangeClosed(1, 30).forEach(i -> {
             Member member = memberFactory.createMember("member1 " + i);
-            Post post = postFactory.createPost(member, board, true);
-            postRepository.save(post);
+            postFactory.createPost(member, board, true);
         });
 
         //then
@@ -643,8 +667,7 @@ public class PostControllerTest {
         Board board = boardFactory.createBoard("free");
         IntStream.rangeClosed(1, 30).forEach(i -> {
             Member member = memberFactory.createMember("member2 " + i);
-            Post post = postFactory.createPost(member, board, true);
-            postRepository.save(post);
+            postFactory.createPost(member, board, true);
         });
 
         //then
@@ -666,8 +689,7 @@ public class PostControllerTest {
         Board board = boardFactory.createBoard("free");
         IntStream.rangeClosed(1, 30).forEach(i -> {
             Member member = memberFactory.createMember("member3 " + i);
-            Post post = postFactory.createPost(member, board, true);
-            postRepository.save(post);
+            postFactory.createPost(member, board, true);
         });
 
         //then
@@ -694,8 +716,7 @@ public class PostControllerTest {
         Board board = boardFactory.createBoard("free");
         IntStream.rangeClosed(1, 50).forEach(i -> {
             Member member = memberFactory.createMember("member4 " + i);
-            Post post = postFactory.createPost(member, board, true);
-            postRepository.save(post);
+            postFactory.createPost(member, board, true);
         });
 
         //then
@@ -717,8 +738,7 @@ public class PostControllerTest {
         Board board = boardFactory.createBoard("free");
         IntStream.rangeClosed(1, 120).forEach(i -> {
             Member member = memberFactory.createMember("member5 " + i);
-            Post post = postFactory.createPost(member, board, true);
-            postRepository.save(post);
+            postFactory.createPost(member, board, true);
         });
 
         //then
@@ -762,8 +782,12 @@ public class PostControllerTest {
 
 
 
-    /** 특정 member 가 작성한 글 페이징 조회 */
-    @DisplayName("특정 member 가 작성한 글 여러개 조회")
+    /**
+     * 특정 회원이 작성한 글 페이징 조회
+     * (글에 댓글이 없는 경우)
+     */
+
+    @DisplayName("특정 회원이 작성한 글 여러개 조회")
     @Test
     void test26() throws Exception {
         //given
@@ -790,7 +814,7 @@ public class PostControllerTest {
                 .andDo(print());
     }
 
-    @DisplayName("특정 member 가 작성한 글 페이징 조회시 페이지 정보가 없거나 잘못된 경우 1 페이지가 조회된다")
+    @DisplayName("특정 회원이 작성한 글 페이징 조회시 페이지 정보가 없거나 잘못된 경우 1 페이지가 조회된다")
     @Test
     void test27() throws Exception {
         //given
@@ -822,7 +846,7 @@ public class PostControllerTest {
                 .andDo(print());
     }
 
-    @DisplayName("존재하지 않는 member 의 작성글은 조회할수 없다")
+    @DisplayName("존재하지 않는 회원의 작성글은 조회할수 없다")
     @Test
     void test28() throws Exception {
         mockMvc.perform(get("/member/{username}/posts", "1234"))
@@ -832,7 +856,7 @@ public class PostControllerTest {
                 .andDo(print());
     }
 
-    @DisplayName("존재하지 않는 member 의 작성글은 조회할수 없다 2")
+    @DisplayName("존재하지 않는 회원의 작성글은 조회할수 없다 2")
     @Test
     void test228() throws Exception {
         mockMvc.perform(get("/member//posts"))
@@ -841,12 +865,12 @@ public class PostControllerTest {
     }
 
 
-    @DisplayName("탈퇴한 member 의 작성글은 조회할수 없다")
+    @DisplayName("탈퇴한 회원의 작성글을 한꺼번에 조회할수 없다")
     @Test
     void test928() throws Exception {
         Member member = memberFactory.createMember("deleteMember");
         Board board = boardFactory.createBoard("free");
-        Post post = postFactory.createPost(member, board, true);
+        postFactory.createPost(member, board, true);
         memberRepository.delete(member);
 
         mockMvc.perform(get("/member/{username}/posts", "deleteMember"))
@@ -857,7 +881,7 @@ public class PostControllerTest {
     }
 
 
-    @DisplayName("아무 글도 작성하지 않은 member 의 작성글 조회시 빈 ArrayList 가 반환된다")
+    @DisplayName("아무 글도 작성하지 않은 회원의 작성글 조회시 빈 ArrayList 가 반환된다")
     @Test
     void test29() throws Exception {
         //when
@@ -869,10 +893,133 @@ public class PostControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * 내가 좋아요 누른글 페이징 조회
+     * (댓글 없는 경우)
+     */
+    @DisplayName("내가 좋아요 누른글 페이징 조회")
+    @Test
+    void test11231254() throws Exception {
+        //given
+        Member member = memberFactory.createMember("likeMember");
+
+        IntStream.rangeClosed(1, 10).forEach(i -> {
+            Board board = boardFactory.createBoard("free " + i);
+            Member likeMember = memberFactory.createMember("newMemberD " + i);
+            IntStream.rangeClosed(1, 10).forEach(e -> {
+                Post post = postFactory.createPost(likeMember, board, true);
+                likeFactory.createLike(post, member);
+            });
+        });
+
+        //then
+        mockMvc.perform(get("/member/{username}/likes?page=1", "likeMember")
+                        .with(user("likeMember")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(20))
+                .andDo(print());
+    }
+
+    @DisplayName("다른 이용자가 내가 좋아요 누른 글 목록을 확인할수 없다")
+    @Test
+    void test112231254() throws Exception {
+        //given
+        Member member = memberFactory.createMember("likeMemberQ");
+
+        IntStream.rangeClosed(1, 10).forEach(i -> {
+            Board board = boardFactory.createBoard("free " + i);
+            Member likeMember = memberFactory.createMember("newMemberD " + i);
+            IntStream.rangeClosed(1, 10).forEach(e -> {
+                Post post = postFactory.createPost(likeMember, board, true);
+                likeFactory.createLike(post, member);
+            });
+        });
+        //when
+        memberFactory.createMember("invalidUser");
+
+        //then
+        mockMvc.perform(get("/member/{username}/likes?page=1", "likeMemberQ")
+                        .with(user("invalidUser")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("해당 권한이 없습니다"))
+                .andDo(print());
+    }
+
+    @DisplayName("내가 좋아요 누른글 페이징 조회시 페이지 정보가 없거나 잘못된 경우 1 페이지가 조회된다")
+    @Test
+    void test254() throws Exception {
+        //given
+        Member member = memberFactory.createMember("likeMemberB");
+
+        IntStream.rangeClosed(1, 10).forEach(i -> {
+            Board board = boardFactory.createBoard("free " + i);
+            Member likeMember = memberFactory.createMember("newMemberD " + i);
+            IntStream.rangeClosed(1, 10).forEach(e -> {
+                Post post = postFactory.createPost(likeMember, board, true);
+                likeFactory.createLike(post, member);
+            });
+        });
+
+        //then
+        mockMvc.perform(get("/member/{username}/likes?page=","likeMemberB")
+                        .with(user("likeMemberB")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(20))
+                .andDo(print());
+
+        mockMvc.perform(get("/member/{username}/likes", "likeMemberB")
+                        .with(user("likeMemberB")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(20))
+                .andDo(print());
+
+        mockMvc.perform(get("/member/{username}/likes?qwer=!@#abc", "likeMemberB")
+                        .with(user("likeMemberB")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(20))
+                .andDo(print());
+
+        mockMvc.perform(get("/member/{username}/likes?page=qwer", "likeMemberB")
+                        .with(user("likeMemberB")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(20))
+                .andDo(print());
+
+        mockMvc.perform(get("/member/{username}/likes?page=-12", "likeMemberB")
+                        .with(user("likeMemberB")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(20))
+                .andDo(print());
+    }
+
+    @DisplayName("존재하지 않는 이용자가 좋아요 누른글들을 조회할수 없다")
+    @Test
+    void test25124() throws Exception {
+        mockMvc.perform(get("/member/{username}/likes?page=1", "likeMemberC")
+                        .with(user("likeMemberA")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("해당 권한이 없습니다"))
+                .andDo(print());
+    }
+
+    @DisplayName("좋아요 누른 글이 없다면 빈 ArrayList 가 응답된다")
+    @Test
+    void test251224() throws Exception {
+        //when
+        memberFactory.createMember("emptyMember");
+
+        //then
+        mockMvc.perform(get("/member/{username}/likes?page=1","emptyMember")
+                        .with(user("emptyMember")))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
 
 
+    /**
+     * 글 수정 요청
+     */
 
-    /** 글 수정 요청 */
     @DisplayName("글 수정 요청")
     @Test
     void test34() throws Exception {
@@ -1472,7 +1619,10 @@ public class PostControllerTest {
     }
 
 
-    /** 글 삭제 요청 */
+    /**
+     * 글 삭제 요청
+     */
+
     @DisplayName("글 삭제")
     @Test
     void test52() throws Exception {

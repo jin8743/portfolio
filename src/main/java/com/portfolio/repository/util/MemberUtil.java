@@ -26,6 +26,12 @@ public class MemberUtil {
         }
     }
 
+    public static void validateUsername(String username) {
+        if (getAuthenticatedUsername().equals(username) == false) {
+            throw new AuthorizationFailedException();
+        }
+    }
+
     public static String getAuthenticatedUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null ? authentication.getName() : "";

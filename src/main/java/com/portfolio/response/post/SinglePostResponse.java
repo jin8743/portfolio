@@ -3,7 +3,7 @@ package com.portfolio.response.post;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.portfolio.domain.Post;
 import com.portfolio.response.comment.PostCommentResponse;
-import lombok.Data;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -11,26 +11,39 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static com.portfolio.domain.Post.loadTotalComments;
 import static com.portfolio.repository.util.MemberUtil.getAuthenticatedUsername;
 
 @Getter
 public class SinglePostResponse {
 
+    // 게시판 영문 이름
     private final String boardName;
+
+    //게시판 한글 이름
     private final String nickName;
+
+    //글 번호
     private final Long postId;
+
+    //글 제목
     private final String title;
+
+    //글 작성자
     private final String writer;
+
+    //마지막 수정 시간
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime lastModifiedDate;
+
+    //글 내용
     private final String content;
-    private final Integer totalComments;
-    private final Integer totalLikes;
+
+    //내가 작성한 글인지 여부
     private final Boolean myPost;
-    private final List<PostCommentResponse> comments;
 
-
-    public SinglePostResponse(Post post, String username) {
+    @Builder
+    public SinglePostResponse(Post post) {
         this.boardName = post.getBoard().getBoardName();
         this.nickName = post.getBoard().getNickname();
         this.postId = post.getId();
@@ -38,17 +51,6 @@ public class SinglePostResponse {
         this.writer = post.getMember().getUsername();
         this.lastModifiedDate = post.getLastModifiedDate();
         this.content = post.getContent();
-        this.totalComments = totalComments(post);
-        this.totalLikes = post.getLikes();
-        this.myPost = post.getMember().getUsername().equals(username);
-        this.comments = post.getComments().stream()
-                .map(PostCommentResponse::new)
-                .collect(Collectors.toList());
-    }
-
-    private Integer totalComments(Post post) {
-        AtomicInteger count = new AtomicInteger();
-        post.getComments().forEach(comment -> count.addAndGet(comment.getChilds().size()));
-        return count.get() + post.getComments().size();
+        this.myPost = post.getMember().getUsername().equals(getAuthenticatedUsername());
     }
 }

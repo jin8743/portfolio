@@ -1,14 +1,13 @@
 package com.portfolio.domain;
 
 import com.portfolio.domain.editor.PostEditor;
-import com.portfolio.exception.custom.CustomNotFoundException;
 import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.portfolio.exception.custom.CustomNotFoundException.*;
 import static javax.persistence.CascadeType.*;
 import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.*;
@@ -31,14 +30,14 @@ public class Post extends BaseEntity{
     @OneToMany(mappedBy = "post", cascade = ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
-    private Boolean commentsAllowed = true;
+    @OneToMany(mappedBy = "liks", cascade = ALL, orphanRemoval = true)
+    private List<Like> likes = new ArrayList<>();
+
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "board_id")
     private Board board;
 
-
-    /** LikeService.like() 에서만 해당 값 변경 가능 */
-    private Integer likes = 0;
+    private Boolean commentsAllowed = true;
 
     @Builder
     public Post(String title, String content, Member member,
@@ -57,32 +56,17 @@ public class Post extends BaseEntity{
                 .commentsAllowed(commentsAllowed);
     }
 
-    /** 여기에서만 글 제목, 내용 수정 가능*/
+    /** 여기에서만 글 제목, 내용, 댓글 허용 여부 수정 가능*/
     public void edit(PostEditor postEditor) {
         this.title = postEditor.getTitle();
         this.content = postEditor.getContent();
         this.commentsAllowed = postEditor.getCommentsAllowed();
-        System.out.println(this.commentsAllowed);
     }
 
-    /**  LikeService.like() 에서만 해당 method 사용 가능 */
-    public void increaseLike() {
-        this.likes++;
+    // 글에 작성된 댓글과 대댓글의 총합
+    public static Integer loadTotalComments(Post post) {
+        AtomicInteger count = new AtomicInteger();
+        post.getComments().forEach(comment -> count.addAndGet(comment.getChilds().size()));
+        return count.get() + post.getComments().size();
     }
-
-    /**  LikeService.like() 에서만 해당 method 사용 가능 */
-    public void decreaseLike() {
-        if (this.likes > 0) {
-            this.likes--;
-        }
-    }
-
-    public static void checkNull(Post post) {
-        if (post == null) {
-            throw new CustomNotFoundException(POST_NOT_FOUND);
-        }
-    }
-
-
-
 }

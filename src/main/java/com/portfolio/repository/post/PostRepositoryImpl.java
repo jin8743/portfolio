@@ -31,7 +31,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .leftJoin(post.board, board).fetchJoin()
                 .leftJoin(post.comments, comment).fetchJoin()
                 .leftJoin(comment.member, member).fetchJoin()
-//                .leftJoin(comment.parent).fetchJoin()
                 .fetchOne();
     }
 
@@ -50,18 +49,19 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .fetch();
     }
 
-    /** 특정 member 가 작성한 글 페이징 조회 */
+    /** 특정 회원이 작성한 글 페이징 조회 */
     @Override
     public List<Post> findPostsByMember(Member member, int page) {
         return jpaQueryFactory
                 .selectFrom(post)
                 .where(post.member.eq(member))
-                .join(post.board, board).fetchJoin()
+                .leftJoin(post.board, board).fetchJoin()
                 .orderBy(post.id.desc())
                 .offset(getOffset(page))
                 .limit(20)
                 .fetch();
     }
+
 
     private Long getOffset(int page) {
         return (page - 1) * 20L;

@@ -14,4 +14,5 @@ public interface PostRepositoryCustom {
     List<Post> findPostsByBoard(SearchPostsByBoard searchPostsByBoard);
 
     List<Post> findPostsByMember(Member member, int page);
+
 }

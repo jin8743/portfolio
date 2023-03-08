@@ -1,12 +1,14 @@
 package com.portfolio.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.portfolio.controller.factory.*;
 import com.portfolio.domain.*;
 import com.portfolio.repository.member.MemberRepository;
 import com.portfolio.repository.board.BoardRepository;
 import com.portfolio.repository.comment.CommentRepository;
 import com.portfolio.repository.like.LikeRepository;
 import com.portfolio.repository.post.PostRepository;
+import com.portfolio.request.like.CreateLike;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,17 +18,28 @@ import org.springframework.test.web.servlet.MockMvc;
 import static com.portfolio.domain.MemberRole.ROLE_MEMBER;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class LikeControllerTest {
 
     @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
     private CommentRepository commentRepository;
+
     @Autowired
     private BoardRepository boardRepository;
 
@@ -37,123 +50,171 @@ public class LikeControllerTest {
     private MemberRepository memberRepository;
 
     @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
     private LikeRepository likeRepository;
+
     @Autowired
-    private MockMvc mockMvc;
+    private PostFactory postFactory;
+
+    @Autowired
+    private MemberFactory memberFactory;
+
+    @Autowired
+    private LikeFactory likeFactory;
+
+    @Autowired
+    private CommentFactory commentFactory;
+
+    @Autowired
+    private BoardFactory boardFactory;
 
 
-    @BeforeAll
-    void init() {
-        Board board = Board.builder()
-                .boardName("free")
-                .build();
-        boardRepository.save(board);
 
-        Member member = Member.builder()
-                .username("username")
-                .password("password1234")
-                .build();
-        memberRepository.save(member);
 
-        Post post = Post.builder()
-                .title("제목입니다")
-                .content("내용입니다")
-                .member(member)
-                .board(board)
-                .build();
-
-        postRepository.save(post);
-    }
-
-    @BeforeEach
+    @AfterEach
     void clear() {
         likeRepository.deleteAll();
+        postRepository.deleteAll();
+        commentRepository.deleteAll();
+        memberRepository.deleteAll();
+        boardRepository.deleteAll();
     }
 
-    @DisplayName("/likes 요청시 DB에 값이 저장된다")
+
+    /**
+     * 좋아요 요청
+     */
+
+    @DisplayName("좋아요 요청 정상처리")
     @Test
     void test1() throws Exception {
-        //when
-        mockMvc.perform(post("/likes/{postId}", 1L)
-                        .contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print());
+
+        //given
+        Board board = boardFactory.createBoard("abc");
+        Member member = memberFactory.createMember("qwer");
+        Post post = postFactory.createPost(member, board, true);
 
         //then
-        Like like = likeRepository.findById(1L).get();
-        Post post = postRepository.findById(1L).get();
+        mockMvc.perform(post("/likes?postId=" + post.getId())
+                        .with(user("qwer"))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andDo(print());
 
         assertEquals(1, likeRepository.count());
-        assertEquals("username", like.getMember().getUsername());
-        assertEquals("제목입니다", like.getPost().getTitle());
-        assertEquals(1, post.getLikes());
+        Long likeId = likeRepository.findAll().get(0).getId();
+        Like like = likeRepository.findWithPostAndMemberById(likeId);
+        assertEquals("qwer", like.getMember().getUsername());
+        assertEquals("내용", like.getPost().getContent());
     }
 
-    @DisplayName("이미 좋아요를 누른 글에 한번더 좋아요를 누를경우 " +
-            "기존 좋아요가 삭제된다")
+    @DisplayName("좋아요 요청 잘못된 요청 (필수 파라미터 누락 또는 잘못된 형식)")
     @Test
     void test2() throws Exception {
-        //given
-        likeRepository.save(Like.builder()
-                .post(postRepository.findById(1L).get())
-                .member(memberRepository.findByUsername("username").get())
-                .build());
 
+        //given
+        Board board = boardFactory.createBoard("abc");
+        Member member = memberFactory.createMember("qwer2");
+        postFactory.createPost(member, board, true);
+
+        //then
+        mockMvc.perform(post("/likes")
+                        .with(user("qwer2"))
+                        .with(csrf()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("게시글이 존재하지 않거나 삭제되었습니다"))
+                .andDo(print());
+
+        mockMvc.perform(post("/likes?postId=" + "zxcv")
+                        .with(user("qwer2"))
+                        .with(csrf()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("게시글이 존재하지 않거나 삭제되었습니다"))
+                .andDo(print());
+
+        mockMvc.perform(post("/likes?abcd=" + 123)
+                        .with(user("qwer2"))
+                        .with(csrf()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("게시글이 존재하지 않거나 삭제되었습니다"))
+                .andDo(print());
+
+        assertEquals(0, likeRepository.count());
+    }
+
+    @DisplayName("로그인을 하지 않은 상태로 좋아요를 누를수 없다")
+    @Test
+    void test4() throws Exception {
+        //given
+        Board board = boardFactory.createBoard("abc");
+        Member member = memberFactory.createMember("qwer1");
+        Post post = postFactory.createPost(member, board, true);
+
+        //then
+        mockMvc.perform(post("/likes?postId=" + post.getId())
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized())
+                .andExpect(unauthenticated())
+                .andDo(print());
+
+        assertEquals(0, likeRepository.count());
+    }
+
+    @DisplayName("존재하지 않는 글에 좋아요를 누를수 없다")
+    @Test
+    void test5() throws Exception {
+        //when
+        memberFactory.createMember("asdf");
+
+        //then
+        mockMvc.perform(post("/likes?postId=" + 123)
+                        .with(user("asdf"))
+                        .with(csrf()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("게시글이 존재하지 않거나 삭제되었습니다"))
+                .andDo(print());
+        assertEquals(0, likeRepository.count());
+    }
+
+    @DisplayName("이미 좋아요를 누른글에 다시한번 좋아요를 누를수 없다")
+    @Test
+    void test12() throws Exception {
+        //given
+        Board board = boardFactory.createBoard("abc");
+        Member member = memberFactory.createMember("qwer2");
+        Post post = postFactory.createPost(member, board, true);
+        likeFactory.createLike(post, member);
+
+        //then
+        mockMvc.perform(post("/likes?postId=" + post.getId())
+                        .with(user("qwer2"))
+                        .with(csrf()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("게시글이 존재하지 않거나 삭제되었습니다"))
+                .andDo(print());
+        assertEquals(1, likeRepository.count());
+    }
+
+    /**
+     * 좋아요 취소
+     */
+    @DisplayName("좋아요 취소 정상 요청")
+    @Test
+    void test6() throws Exception {
+        //given
+        Board board = boardFactory.createBoard("abc");
+        Member member = memberFactory.createMember("qwer1");
+        Post post = postFactory.createPost(member, board, true);
+        likeFactory.createLike(post, member);
 
         //when
-        mockMvc.perform(post("/likes/{postId}", 1L)
-                        .contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
+        mockMvc.perform(delete("/likes?postId=" + post.getId())
+                        .with(user("qwer1"))
+                        .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$."))
                 .andDo(print());
 
         //then
-        Post post = postRepository.findById(1L).get();
         assertEquals(0, likeRepository.count());
-        assertEquals(0, post.getLikes());
     }
-
-
-//    @Test
-//    @DisplayName("동시성 문제 확인")
-//    void test3() throws InterruptedException {
-//
-//        List<Member> members = IntStream.rangeClosed(1, 100).mapToObj(i ->
-//                        Member.builder()
-//                                .username("username " + i)
-//                                .password("password " + i)
-//                                .isEnabled(true)
-//                                .role(MemberRole.ROLE_MEMBER)
-//                                .build())
-//                .collect(Collectors.toList());
-//        memberRepository.saveAll(members);
-//
-//
-//        int threadCount = 100;
-//        ExecutorService executorService = Executors.newFixedThreadPool(32);
-//        CountDownLatch latch = new CountDownLatch(threadCount);
-//
-//        for (int i = 0; i < threadCount; i++) {
-//            executorService.submit(() -> {
-//                try {
-//                    mockMvc.perform(post("/likes/{postId}", 1L)
-//                                    .with(jwt().jwt(jwt -> jwt.subject("username " + i)))
-//                                    .contentType(APPLICATION_JSON))
-//                } finally {
-//                    latch.countDown();
-//
-//                }
-//            });
-//        }
-//
-//        latch.await();
-//
-//        Post post = postRepository.findById(1L).get();
-//        assertEquals(100, post.getLikes());
-//    }
-
-
-
 }

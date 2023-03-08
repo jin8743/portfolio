@@ -3,16 +3,16 @@ package com.portfolio.service;
 import com.portfolio.domain.Like;
 import com.portfolio.domain.Member;
 import com.portfolio.domain.Post;
-import com.portfolio.exception.custom.CustomNotFoundException;
 import com.portfolio.repository.like.LikeRepository;
 import com.portfolio.repository.post.PostRepository;
 import com.portfolio.repository.util.MemberUtil;
+import com.portfolio.request.like.CancelLike;
+import com.portfolio.request.like.CreateLike;
+import com.portfolio.request.like.SearchSinglePostLike;
+import com.portfolio.response.like.SinglePostLikeResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static com.portfolio.domain.Like.*;
-import static com.portfolio.exception.custom.CustomNotFoundException.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -20,33 +20,49 @@ import static com.portfolio.exception.custom.CustomNotFoundException.*;
 public class LikeService {
 
     private final LikeRepository likeRepository;
+
     private final MemberUtil memberUtil;
+
     private final PostRepository postRepository;
 
+    /** 좋아요 누름 */
     @Transactional
-    public void like(Long postId) {
-
-        Member member = memberUtil.getContextMember();
-        Post post = postRepository.findConcurrentById(postId)
-                .orElseThrow(() -> new CustomNotFoundException(POST_NOT_FOUND));
-        Like like = likeRepository.loadExistingLike(member, post);
-
-        /** 좋아요가 이미 있는 경우 기존 좋아요 삭제,  해당글의 좋아요수 -1
-         *  없는 경우 새로 생성, 해당글의 좋아요수 + 1
-         */
-        if (like == null) {
-            likeRepository.save(createLike(post, member));
-            post.increaseLike();
-        } else {
-            cancelLike(like);
-            post.decreaseLike();
-        }
+    public void createLike(CreateLike request) {
+        likeRepository.save(createNewLike(request));
     }
 
+    private Like createNewLike(CreateLike request) {
+        Member member = memberUtil.getContextMember();
+        Post post = postRepository.findPostById(request.getPostId());
+        return Like.builder().member(member).post(post).build();
+    }
+
+    /** 좋아요 취소 */
     @Transactional
-    public void cancelLike(Like like) {
+    public void cancelLike(CancelLike request) {
+        Like like = findExistingLike(request);
         likeRepository.delete(like);
     }
 
+    private Like findExistingLike(CancelLike request) {
+        Post post = postRepository.findPostById(request.getPostId());
+        Member member = memberUtil.getContextMember();
+        return likeRepository.findByPostAndMember(post, member);
+    }
 
+    /** 특정 글에 달린 좋아요 개수와 내가 좋아요를 눌렀는지 조회 */
+    public SinglePostLikeResponse searchPostLikes(SearchSinglePostLike request) {
+        Post post = postRepository.findPostById(request.getPostId());
+        return getSinglePostLikeResponse(post);
+    }
+
+    private SinglePostLikeResponse getSinglePostLikeResponse(Post post) {
+
+        //해당 글에 달린 총 좋아요 수
+        Long totalLikes = likeRepository.findLikeCountByPost(post);
+
+        //해당 글에 내가 좋아요를 눌렀는지 여부
+        Boolean likedPost = likeRepository.pressedLikeOnThisPost(post);
+        return new SinglePostLikeResponse(totalLikes, likedPost);
+    }
 }

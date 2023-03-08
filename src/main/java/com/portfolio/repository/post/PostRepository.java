@@ -13,12 +13,12 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
 
     boolean existsById(Long id);
 
-    @Lock(value = LockModeType.PESSIMISTIC_WRITE)
-    Optional<Post> findConcurrentById(Long id);
-
     @EntityGraph(attributePaths = {"member"})
     Post findPostWithMemberById(Long id);
 
     Post findPostById(Long id);
+
+    @EntityGraph(attributePaths = {"member", "board"})
+    Post findPostWithMemberAndBoardById(Long id);
 }
 

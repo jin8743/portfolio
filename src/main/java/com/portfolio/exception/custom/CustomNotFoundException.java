@@ -14,6 +14,8 @@ public class CustomNotFoundException extends DefaultException {
 
     public static final String BOARD_NOT_FOUND = "알수 없는 게시판 이름 입니다";
 
+    public static final String LIKE_NOT_FOUND = "해당 글에 좋아요를 누르지 않았습니다";
+
 
     public CustomNotFoundException(String message) {
         super(message);

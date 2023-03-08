@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.portfolio.domain.Post.loadTotalComments;
+
 @Getter
 public class MemberPostResponse {
 
@@ -21,7 +23,7 @@ public class MemberPostResponse {
     public MemberPostResponse(Post post) {
         this.postId = post.getId();
         this.title = post.getTitle();
-        this.totalComments = post.getComments().size();
+        this.totalComments = loadTotalComments(post);
         this.boardName = post.getBoard().getBoardName();
         this.lastModifiedDate = post.getLastModifiedDate();
     }

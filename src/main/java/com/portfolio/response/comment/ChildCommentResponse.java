@@ -17,6 +17,7 @@ public class ChildCommentResponse {
     private final Long Id;
     private final String content;
     private final String username;
+    //내가 작성한 댓글인지 여부
     private final Boolean myComment;
     @JsonFormat(shape = STRING, pattern = "MM.dd HH:mm:ss")
     private final LocalDateTime lastModifiedDate;

@@ -1,10 +1,14 @@
 package com.portfolio.response.post;
 
 import com.portfolio.domain.Post;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-public class MemberLikedPostResponse {
+import static com.portfolio.domain.Post.loadTotalComments;
+
+@Getter
+public class MyLikedPostResponse {
 
     private final Long postId;
     private final String username;
@@ -13,11 +17,11 @@ public class MemberLikedPostResponse {
     private final String boardName;
     private final LocalDateTime lastModifiedDate;
 
-    public MemberLikedPostResponse(Post post) {
+    public MyLikedPostResponse(Post post) {
         this.postId = post.getId();
         this.username = post.getMember().getUsername();
         this.title = post.getTitle();
-        this.totalComments = post.getComments().size();
+        this.totalComments = loadTotalComments(post);;
         this.boardName = post.getBoard().getBoardName();
         this.lastModifiedDate = post.getLastModifiedDate();
     }

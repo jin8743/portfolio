@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.stream.IntStream;
 
 import static com.portfolio.domain.Comment.*;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.MediaType.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
@@ -676,6 +677,9 @@ public class CommentControllerTest {
 
     /**
      * 대댓글은 없고 댓글만 있는글  단건 조회
+     * (글에 좋아요가 없는 경우)
+     * 예외 상황에 대한 TestCase 는 PostControllerTest 에 있음
+     * 여기에서는 정상 요청에 대한 결과만 조회
      */
 
     @DisplayName("댓글이 있는 글 단건 조회")
@@ -729,6 +733,9 @@ public class CommentControllerTest {
 
     /**
      * 댓글과 대댓글 모두 있는글 단건 조회
+     * (글에 좋아요가 없는 경우)
+     * 예외 상황에 대한 TestCase 는 PostControllerTest 에 있음
+     * 여기에서는 정상 요청에 대한 결과만 조회
      */
 
     @DisplayName("댓글과 대댓글 모두 있는글 단건 조회")
@@ -788,10 +795,10 @@ public class CommentControllerTest {
 
 
     /**
-     * 특정 member 가 작성한 댓글, 대댓글들 페이징 조회
+     * 특정 회원이 작성한 댓글, 대댓글들 페이징 조회
      */
 
-    @DisplayName("특정 member 가 댓글만 작성한 경우 작성 댓글 조회")
+    @DisplayName("특정 회원이 댓글만 작성한 경우 작성 댓글 조회")
     @Test
     void test23() throws Exception {
         //given
@@ -824,7 +831,7 @@ public class CommentControllerTest {
                 .andDo(print());
     }
 
-    @DisplayName("특정 member 가 대댓글만 작성한 경우 작성 댓글 조회")
+    @DisplayName("특정 회원이 대댓글만 작성한 경우 작성 댓글 조회")
     @Test
     void test24() throws Exception {
         //given
@@ -858,7 +865,7 @@ public class CommentControllerTest {
                 .andDo(print());
     }
 
-    @DisplayName("특정 member 가 댓글과 대댓글 모두 작성했을 경우")
+    @DisplayName("특정 회원이 댓글과 대댓글 모두 작성했을 경우")
     @Test
     void test25() throws Exception {
         //given
@@ -898,7 +905,7 @@ public class CommentControllerTest {
     }
 
 
-    @DisplayName("특정 member 가 작성한 댓글 조회시 페이지 정보가 없거나 잘못된 경우 1페이지를 보여준다")
+    @DisplayName("특정 회원이 작성한 댓글 조회시 페이지 정보가 없거나 잘못된 경우 1페이지를 보여준다")
     @Test
     void test26() throws Exception {
         //given
@@ -976,7 +983,7 @@ public class CommentControllerTest {
                 .andDo(print());
     }
 
-    @DisplayName("존재하지 않는 member 가 작성한 댓글을 페이징 조회할수 없다")
+    @DisplayName("존재하지 않는 회원이 작성한 댓글을 페이징 조회할수 없다")
     @Test
     void test28() throws Exception {
         mockMvc.perform(get("/member/{username}/comments", "unknownMember"))
@@ -986,7 +993,7 @@ public class CommentControllerTest {
                 .andDo(print());
     }
 
-    @DisplayName("탈퇴한 member 가 작성한 댓글을 페이징 조회할수 없다")
+    @DisplayName("탈퇴한 회원이 작성한 댓글을 페이징 조회할수 없다")
     @Test
     void test29() throws Exception {
         //given
@@ -1004,6 +1011,119 @@ public class CommentControllerTest {
                 .andExpect(jsonPath("$.message").value("사용자를 찾을수 없습니다."))
                 .andDo(print());
     }
+
+    /** 특정 게시판에 작성된 글 페이징 조회
+     *  (댓글이 있는 경우)
+     *  예외 상황에 대한 테스트 케이스는 PostControllerTest 에 있음
+     *  여기에서는 정상 요청에 대한 결과만 조회
+     */
+    @DisplayName("특정 게시판에 작성된 글 페이징 조회 (댓글만 있고 대댓글은 없는 경우)")
+    @Test
+    void test12127() throws Exception {
+        //given
+        Board board = boardFactory.createBoard("free");
+        IntStream.rangeClosed(1, 30).forEach(i -> {
+            Member member1 = memberFactory.createMember("memberW " +  + i);
+            Member member2 = memberFactory.createMember("memberK " +  + i);
+            Post post = postFactory.createPost(member1, board, true);
+            IntStream.rangeClosed(1, 5).forEach(e -> {
+                commentFactory.createParentComment(post, member1, i + " 번쨰 글의 댓글" + e);
+                commentFactory.createParentComment(post, member2, i + " 번쨰 글의 댓글" + e);
+            });
+        });
+
+        //then
+        mockMvc.perform(get("/posts/view?board=free&page=1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()", is(20)))
+                .andExpect(jsonPath("$[0].title").value("제목"))
+                .andExpect(jsonPath("$[0].username").value("memberW 30"))
+                .andDo(print());
+    }
+
+    @DisplayName("특정 게시판에 작성된 글 페이징 조회 (댓글과 대댓글 모두 있는 경우)")
+    @Test
+    void test1212127() throws Exception {
+        //given
+        Board board = boardFactory.createBoard("free");
+        IntStream.rangeClosed(1, 30).forEach(i -> {
+            Member member1 = memberFactory.createMember("userH " +  + i);
+            Member member2 = memberFactory.createMember("userJ " +  + i);
+            Post post = postFactory.createPost(member1, board, true);
+            IntStream.rangeClosed(1, 5).forEach(e -> {
+                Comment parentComment1 = commentFactory.createParentComment(post, member1, i + " 번쨰 글의 댓글" + e);
+                Comment parentComment2 = commentFactory.createParentComment(post, member2, i + " 번쨰 글의 댓글" + e);
+                commentFactory.createChildComment(parentComment1, member1, "대댓글");
+                commentFactory.createChildComment(parentComment2, member2, "대댓글");
+            });
+        });
+
+        //then
+        mockMvc.perform(get("/posts/view?board=free&page=1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()", is(20)))
+                .andExpect(jsonPath("$[0].title").value("제목"))
+                .andExpect(jsonPath("$[0].username").value("userH 30"))
+                .andDo(print());
+        assertEquals(600, commentRepository.count());
+    }
+
+
+
+    /** 특정 회원이 작성한 글 페이징 조회
+     * (댓글이 있는 경우)
+     *  예외 상황에 대한 테스트 케이스는 PostControllerTest 에 있음
+     *  여기에서는 정상 요청에 대한 결과만 조회
+     */
+    @DisplayName("특정 회원이 작성한 글 여러개 조회 (댓글만 있고 대댓글은 없는 경우)")
+    @Test
+    void test2126() throws Exception {
+        //given
+        Board board = boardFactory.createBoard("free");
+        Member member = memberFactory.createMember("account123");
+        IntStream.rangeClosed(1, 30).forEach(i -> {
+            Post post = postFactory.createPost(member, board, true);
+            IntStream.rangeClosed(1, 5).forEach(e -> {
+                Member userA = memberFactory.createMember("accountV " + i + " " + e);
+                commentFactory.createParentComment(post, member, "댓글");
+                commentFactory.createParentComment(post, userA, "댓글");
+                commentFactory.createParentComment(post, userA, "댓글2");
+            });
+        });
+
+        //then
+        mockMvc.perform(get("/member/{username}/posts?page=1", member.getUsername()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()", is(20)))
+                .andDo(print());
+    }
+
+
+    @DisplayName("특정 회원이 작성한 글 여러개 조회 (댓글과 대댓글은 모두 있는 경우)")
+    @Test
+    void test21226() throws Exception {
+        //given
+        Board board = boardFactory.createBoard("free");
+        Member member = memberFactory.createMember("account123");
+        IntStream.rangeClosed(1, 30).forEach(i -> {
+            Post post = postFactory.createPost(member, board, true);
+            IntStream.rangeClosed(1, 5).forEach(e -> {
+                Member userA = memberFactory.createMember("accountV " + i + " " + e);
+                Comment parentComment = commentFactory.createParentComment(post, member, "댓글");
+                Comment parentComment2 = commentFactory.createParentComment(post, userA, "댓글");
+                commentFactory.createChildComment(parentComment, userA, "대댓글");
+                commentFactory.createChildComment(parentComment2, member, "댓글2");
+            });
+        });
+
+        //then
+        mockMvc.perform(get("/member/{username}/posts?page=1", member.getUsername()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()", is(20)))
+                .andDo(print());
+    }
+
+
 
     /**
      *  댓글 수정

@@ -3,10 +3,7 @@ package com.portfolio.controller;
 import com.portfolio.request.common.Page;
 import com.portfolio.request.post.*;
 import com.portfolio.request.validator.post.*;
-import com.portfolio.response.post.BoardPostResponse;
-import com.portfolio.response.post.MemberPostResponse;
-import com.portfolio.response.post.PostBeforeEditResponse;
-import com.portfolio.response.post.SinglePostResponse;
+import com.portfolio.response.post.*;
 import com.portfolio.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -14,6 +11,8 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static com.portfolio.repository.util.MemberUtil.validateUsername;
 
 @RestController
 @RequiredArgsConstructor
@@ -71,15 +70,12 @@ public class PostController {
         postService.write(request);
     }
 
-
     /** 조회 기능 */
-
     //단건 조회
     @GetMapping("/posts")
     public SinglePostResponse singlePost(@Validated SearchSinglePost request) {
         return postService.findSinglePost(request);
     }
-
 
     // 특정 게시판에 작성된 글 페이징 조회
     @GetMapping("/posts/view")
@@ -88,10 +84,18 @@ public class PostController {
     }
 
 
-    //특정 member 가 작성한 글 페이징 조회
+    //특정 회원이 작성한 글 페이징 조회
     @GetMapping("/member/{username}/posts")
-    public List<MemberPostResponse> memberPosts(@PathVariable String username, Page page) {
+    public List<MemberPostResponse> findPostsByMember(@PathVariable String username, Page page) {
         return postService.findPostsByMember(username, page);
+    }
+
+    //내가 좋아요 누른 글 페이징 조회
+    /** 해당 회원 본인만 확인 가능함. 타인은 확인 시도시 인가 예외 발생 */
+    @GetMapping("/member/{username}/likes")
+    public List<MyLikedPostResponse> findLikedPosts(@PathVariable String username, Page page) {
+        validateUsername(username);
+        return postService.findMyLikedPosts(page);
     }
 
 
