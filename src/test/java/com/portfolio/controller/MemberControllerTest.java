@@ -1,6 +1,7 @@
 package com.portfolio.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.portfolio.controller.factory.MemberFactory;
 import com.portfolio.repository.util.MemberUtil;
 import com.portfolio.domain.Member;
 import com.portfolio.repository.member.MemberRepository;
@@ -29,17 +30,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class MemberControllerTest {
 
     @Autowired
-    MemberService memberService;
+    private MockMvc mockMvc;
+
     @Autowired
-    MockMvc mockMvc;
+    private ObjectMapper objectMapper;
+
     @Autowired
-    MemberRepository memberRepository;
+    private MemberUtil memberUtil;
+
     @Autowired
-    ObjectMapper objectMapper;
+    private PasswordEncoder encoder;
+
     @Autowired
-    MemberUtil memberUtil;
+    private MemberService memberService;
+
     @Autowired
-    PasswordEncoder encoder;
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private MemberFactory memberFactory;
+
+
     @AfterEach
     void clear() {
         memberRepository.deleteAll();
@@ -433,6 +444,52 @@ class MemberControllerTest {
                 .andDo(print());
 
         assertEquals(1L, memberRepository.countActiveMember());
+    }
+
+    @DisplayName("탈퇴한 회원의 아이디로 회원가입할수 없다")
+    @Test
+    void test17() throws Exception {
+        //given
+        Member member = memberFactory.createMember("username1234Q");
+        memberRepository.delete(member);
+
+        String json = objectMapper.writeValueAsString(SignUp.builder()
+                .username("username1234Q")
+                .email("qwe@naver.com")
+                .password("password123456!")
+                .passwordConfirm("password123456!")
+                .build());
+
+        //then
+        mockMvc.perform(post("/join")
+                        .contentType(APPLICATION_JSON)
+                        .content(json)
+                        .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("이미 사용중이거나 탈퇴한 아이디입니다."));
+    }
+
+    @DisplayName("탈퇴한 회원의 이메일로 회원가입할수 없다")
+    @Test
+    void test18() throws Exception {
+        //given
+        Member member = memberFactory.createMember("12345");
+        memberRepository.delete(member);
+
+        String json = objectMapper.writeValueAsString(SignUp.builder()
+                .username("QQQWWWWEEE")
+                .email("12345@naver.com")
+                .password("password123456!")
+                .passwordConfirm("password123456!")
+                .build());
+
+        //then
+        mockMvc.perform(post("/join")
+                        .contentType(APPLICATION_JSON)
+                        .content(json)
+                        .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("이미 사용중이거나 탈퇴한 이메일입니다."));
     }
 }
 

@@ -35,16 +35,7 @@ public class LikeRepositoryImpl implements LikeRepositoryCustom {
                 .fetchOne() != null;
     }
 
-    @Override
-    public List<Post> findMyLikedPosts(int page) {
-        return jpaQueryFactory.select(post)
-                .from(like)
-                .where(like.member.username.eq(getAuthenticatedUsername()))
-                .orderBy(like.id.desc())
-                .offset(getOffset(page))
-                .limit(20)
-                .fetch();
-    }
+
 
 
     private Long getOffset(int page) {

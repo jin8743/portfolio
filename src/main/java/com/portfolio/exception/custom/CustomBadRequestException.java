@@ -12,11 +12,15 @@ public class CustomBadRequestException extends DefaultException {
 
     public static final String DUPLICATED_USERNAME = "이미 사용중이거나 탈퇴한 아이디입니다.";
 
+    public static final String UNREGISTERED_MEMBER = "이미 탈퇴한 회원입니다";
+
     public static final String DUPLICATED_EMAIL = "이미 사용중이거나 탈퇴한 이메일입니다.";
 
     public static final String DUPLICATED_LIKE = "이미 좋아요를 누른 글입니다.";
 
     public static final String INVALID_LOGIN_INFO = "아이디/이메일 또는 비밀번호를 잘못 입력했습니다.";
+
+    public static final String UNREGISTERED_ACCOUNT = "탈퇴한 회원입니다";
 
     public static final String INVALID_LOGIN_FORMAT = "로그인 형식에 맞지 않습니다.";
 

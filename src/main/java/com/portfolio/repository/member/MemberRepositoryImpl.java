@@ -46,4 +46,16 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .fetch();
     }
 
+    @Override
+    public List<Member> findMemberList(int page) {
+        return jpaQueryFactory.selectFrom(member)
+                .offset(getOffset(page))
+                .limit(50)
+                .orderBy(member.username.asc())
+                .fetch();
+    }
+
+    private Long getOffset(int page) {
+        return (page - 1) * 100L;
+    }
 }

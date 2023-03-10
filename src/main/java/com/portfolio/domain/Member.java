@@ -22,7 +22,6 @@ import static lombok.AccessLevel.*;
 @NoArgsConstructor(access = PROTECTED)
 @Getter
 @SQLDelete(sql = "UPDATE member SET is_enabled = false WHERE member_id=?")
-//@Where(clause = "is_enabled=true")
 public class Member extends BaseEntity{
 
     @Id
@@ -45,10 +44,11 @@ public class Member extends BaseEntity{
 
 
     @Builder
-    public Member(String username, String email, String password) {
+    public Member(String username, String email, String password, MemberRole role) {
         this.username = username;
         this.email = email;
         this.password = password;
+        this.role = role == null ? ROLE_MEMBER : role;
     }
 
     public MemberEditor.MemberEditorBuilder toEditor() {
@@ -60,14 +60,5 @@ public class Member extends BaseEntity{
     /** 여기서만 데이터 수정 가능 */
     public void editPassword(MemberEditor memberEditor) {
         this.password = memberEditor.getPassword();
-    }
-
-
-    public static Comment isValidComment(Comment comment, Member member) {
-        if (comment.getMember() == member) {
-            return comment;
-        } else {
-            throw new AuthorizationFailedException();
-        }
     }
 }

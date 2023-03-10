@@ -1,4 +1,4 @@
-package com.portfolio.response;
+package com.portfolio.response.error;
 
 import lombok.Builder;
 import lombok.Getter;

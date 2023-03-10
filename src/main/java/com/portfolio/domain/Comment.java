@@ -4,12 +4,14 @@ import com.portfolio.domain.editor.CommentEditor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
 
 import javax.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static javax.persistence.CascadeType.*;
 import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.*;
 import static lombok.AccessLevel.PROTECTED;
@@ -17,6 +19,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Entity
 @Getter
 @NoArgsConstructor(access = PROTECTED)
+@SQLDelete(sql = "UPDATE comment SET is_enabled = false WHERE comment_id=?")
 public class Comment extends BaseEntity{
 
     @Id
@@ -38,8 +41,10 @@ public class Comment extends BaseEntity{
     @JoinColumn(name = "parent_id")
     private Comment parent;
 
-    @OneToMany(mappedBy = "parent", orphanRemoval = true)
+    @OneToMany(mappedBy = "parent")
     private List<Comment> childs= new ArrayList<>();
+
+    private Boolean isEnabled = true;
 
     @Builder
     public Comment(Post post, Member member,
@@ -48,17 +53,23 @@ public class Comment extends BaseEntity{
         this.member = member;
         this.content = content;
 
-        /** 생성하려는 댓글이 대댓글인 경우 양방향 연관 관계 설정 */
-        if (parentComment != null) {
-            this.parent = parentComment;
-            parentComment.childs.add(this);
-        }
+        //양방향 연관관계 설정
+        bindPostAndComment(post);
 
-        /** 생성하려는 댓글이 대댓글이 아닌경우 양방향 연관 관계 설정*/
-        if (post != null) {
-            this.post = post;
-            post.getComments().add(this);
+        //양방향 연관관계 설정
+        bindParentAndChildComment(parentComment);
+    }
+
+    private void bindParentAndChildComment(Comment parentComment) {
+        this.parent = parentComment;
+        if (parentComment != null) {
+            parentComment.getChilds().add(this);
         }
+    }
+
+    private void bindPostAndComment(Post post) {
+        this.post = post;
+        post.getComments().add(this);
     }
 
     public CommentEditor.CommentEditorBuilder toEditor() {
@@ -81,18 +92,4 @@ public class Comment extends BaseEntity{
                 .content(content)
                 .build();
     }
-
-//    public static Comment createChildComment(Member member, Comment parentComment, String content) {
-//        Comment comment = Comment.builder()
-//                .member(member)
-//                .content(content)
-//                .build();
-//
-//        //대댓글 연관관계 설정
-//        parentComment.childs.add(comment);
-//        comment.parent = parentComment;
-//        return comment;
-//    }
-
-
 }

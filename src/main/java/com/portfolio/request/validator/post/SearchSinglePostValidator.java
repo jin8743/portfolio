@@ -1,5 +1,6 @@
 package com.portfolio.request.validator.post;
 
+import com.portfolio.domain.Post;
 import com.portfolio.exception.custom.CustomNotFoundException;
 import com.portfolio.repository.post.PostRepository;
 import com.portfolio.request.post.SearchSinglePost;
@@ -24,8 +25,9 @@ public class SearchSinglePostValidator implements Validator {
     @Override
     public void validate(Object target, Errors errors) {
         SearchSinglePost request = (SearchSinglePost) target;
+        Post post = postRepository.findPostById(request.getId());
 
-        if (postRepository.existsById(request.getId()) == false) {
+        if (post == null) {
             throw new CustomNotFoundException(POST_NOT_FOUND);
         }
     }

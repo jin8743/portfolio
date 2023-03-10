@@ -12,6 +12,7 @@ import org.springframework.validation.Validator;
 
 import static com.portfolio.exception.custom.CustomNotFoundException.*;
 import static com.portfolio.repository.util.MemberUtil.getAuthenticatedUsername;
+import static com.portfolio.repository.util.MemberUtil.isAdmin;
 
 @RequiredArgsConstructor
 @Component
@@ -29,11 +30,11 @@ public class DeleteCommentValidator implements Validator {
         DeleteComment request = (DeleteComment) target;
         Comment comment = commentRepository.findCommentWithMemberById(request.getId());
 
-        if (comment == null) {
+        if (comment == null || comment.getIsEnabled() == false) {
             throw new CustomNotFoundException(COMMENT_NOT_FOUND);
         }
-        if (comment.getMember().getUsername()
-                .equals(getAuthenticatedUsername()) == false) {
+        if (comment.getMember().getUsername().equals(getAuthenticatedUsername()) == false
+                && isAdmin() == false) {
             throw new AuthorizationFailedException();
         }
     }

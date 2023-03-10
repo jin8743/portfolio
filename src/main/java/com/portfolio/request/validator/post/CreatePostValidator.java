@@ -24,9 +24,10 @@ public class CreatePostValidator implements Validator {
     @Override
     public void validate(Object target, Errors errors) {
         CreatePost request = (CreatePost) target;
+
         if (request.getBoardName() != null &&
-                boardRepository.existsByBoardName(
-                request.getBoardName()) == false) {
+                boardRepository.existsByBoardName(request.getBoardName()) == false) {
+
             throw new CustomNotFoundException(BOARD_NOT_FOUND);
         }
     }

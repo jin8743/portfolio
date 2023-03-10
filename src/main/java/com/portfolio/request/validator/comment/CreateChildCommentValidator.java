@@ -1,9 +1,11 @@
 package com.portfolio.request.validator.comment;
 
 import com.portfolio.domain.Comment;
+import com.portfolio.domain.Post;
 import com.portfolio.exception.custom.CustomBadRequestException;
 import com.portfolio.exception.custom.CustomNotFoundException;
 import com.portfolio.repository.comment.CommentRepository;
+import com.portfolio.repository.post.PostRepository;
 import com.portfolio.request.comment.CreateChildComment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -29,12 +31,19 @@ public class CreateChildCommentValidator implements Validator {
         CreateChildComment request = (CreateChildComment) target;
 
         if (request.getParentCommentId() != null) {
+
             Comment comment = commentRepository.findCommentWithPostById(request.getParentCommentId());
 
-            if (comment == null) {
+            if (comment == null || comment.getIsEnabled() == false) {
                 throw new CustomNotFoundException(COMMENT_NOT_FOUND);
             }
-            if (comment.getPost().getCommentsAllowed() == false) {
+
+            Post post = comment.getPost();
+
+            if (post == null || post.getIsEnabled() == false) {
+                throw new CustomNotFoundException(POST_NOT_FOUND);
+            }
+            if (post.getCommentsAllowed() == false) {
                 throw new CustomBadRequestException(COMMENTS_NOT_ALLOWED);
             }
         }

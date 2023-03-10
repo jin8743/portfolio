@@ -24,8 +24,9 @@ public class CommentFactory {
         return comment;
     }
 
-    public Comment createChildComment(Comment parentComment, Member member, String content) {
+    public Comment createChildComment(Post post, Member member, Comment parentComment, String content) {
         Comment comment = Comment.builder()
+                .post(post)
                 .parentComment(parentComment)
                 .member(member)
                 .content(content)

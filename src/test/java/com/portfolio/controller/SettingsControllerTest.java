@@ -57,7 +57,7 @@ public class SettingsControllerTest {
     /** 비밀번호 변경 */
     @DisplayName("비밀번호 변경 요청")
     @Test
-    void test9() throws Exception {
+    void test1() throws Exception {
         //given
         memberFactory.createMember("usernameQ");
 
@@ -83,7 +83,7 @@ public class SettingsControllerTest {
 
     @DisplayName("비밀번호 변경 요청시 RequestBody 에 내용은 필수다")
     @Test
-    void test92() throws Exception {
+    void test2() throws Exception {
         //given
         memberFactory.createMember("usernameA");
 
@@ -101,7 +101,7 @@ public class SettingsControllerTest {
 
     @DisplayName("비밀번호 변경 요청시 기존 비밀번호 입력은 필수다")
     @Test
-    void test12() throws Exception {
+    void test3() throws Exception {
         //given
         memberFactory.createMember("usernameZ");
 
@@ -125,7 +125,7 @@ public class SettingsControllerTest {
 
     @DisplayName("비밀번호 변경 요청시 기존 비밀번호 입력은 필수다 2")
     @Test
-    void test122() throws Exception {
+    void test4() throws Exception {
         //given
         memberFactory.createMember("usernameAS");
 
@@ -148,7 +148,7 @@ public class SettingsControllerTest {
 
     @DisplayName("비밀번호 변경 요청시 입력된 기존 비밀번호는 DB에 저장된 비밀번호와 일치해야된다")
     @Test
-    void test1222() throws Exception {
+    void test5() throws Exception {
         //given
         memberFactory.createMember("usernameQA");
 
@@ -172,7 +172,7 @@ public class SettingsControllerTest {
 
     @DisplayName("비밀번호 변경 요청시 새 비밀번호는 필수다")
     @Test
-    void test1122() throws Exception {
+    void test6() throws Exception {
         //given
         memberFactory.createMember("memberQ");
 
@@ -196,7 +196,7 @@ public class SettingsControllerTest {
 
     @DisplayName("비밀번호 변경 요청시 새 비밀번호는 필수다 2")
     @Test
-    void test112122() throws Exception {
+    void test7() throws Exception {
         //given
         memberFactory.createMember("memberB");
 
@@ -219,7 +219,7 @@ public class SettingsControllerTest {
 
     @DisplayName("비밀번호 변경 요청시 새 비밀번호 확인은 필수다")
     @Test
-    void test11922() throws Exception {
+    void test8() throws Exception {
         //given
         memberFactory.createMember("memberAB");
 
@@ -243,7 +243,7 @@ public class SettingsControllerTest {
 
     @DisplayName("비밀번호 변경 요청시 새 비밀번호 확인은 필수다 2")
     @Test
-    void test1922() throws Exception {
+    void test9() throws Exception {
         //given
         memberFactory.createMember("memberF");
 
@@ -290,7 +290,7 @@ public class SettingsControllerTest {
 
     @DisplayName("비밀번호 변경 요청시 새 비밀번호와 새 비밀번호 확인은 동일해야 된다 2")
     @Test
-    void test120() throws Exception {
+    void test11() throws Exception {
         //given
         memberFactory.createMember("QWE");
 
@@ -315,7 +315,7 @@ public class SettingsControllerTest {
 
     @DisplayName("비밀번호 변경 요청시 새 비밀번호는 기존의 비밀번호와 동일하면 안된다")
     @Test
-    void test1220() throws Exception {
+    void test12() throws Exception {
         //given
         memberFactory.createMember("QWE1");
 
@@ -339,7 +339,7 @@ public class SettingsControllerTest {
 
     @DisplayName("로그인하지 않은 상태로 비밀번호를 변경할수 없다")
     @Test
-    void test12220() throws Exception {
+    void test13() throws Exception {
 
         //given
         memberFactory.createMember("QWET");
@@ -365,7 +365,7 @@ public class SettingsControllerTest {
      */
     @DisplayName("회원탈퇴 요청시 계정이 비활성화 된다")
     @Test
-    void test26() throws Exception {
+    void test14() throws Exception {
         //given
         memberFactory.createMember("deleteMemberA");
 
@@ -388,7 +388,7 @@ public class SettingsControllerTest {
 
     @DisplayName("회원탈퇴 요청시 입력된 비밀번호가 DB에 저장된 값과 동일해야한다")
     @Test
-    void test22() throws Exception {
+    void test15() throws Exception {
         //given
         memberFactory.createMember("deleteMemberB");
 
@@ -412,7 +412,7 @@ public class SettingsControllerTest {
 
     @DisplayName("회원탈퇴 요청시 입력된 비밀번호는 필수다")
     @Test
-    void test2122() throws Exception {
+    void test16() throws Exception {
         //given
         memberFactory.createMember("deleteMemberC");
 
@@ -436,7 +436,7 @@ public class SettingsControllerTest {
 
     @DisplayName("회원탈퇴 요청시 입력된 비밀번호는 필수다 2")
     @Test
-    void test21902() throws Exception {
+    void test17() throws Exception {
         //given
         memberFactory.createMember("deleteMemberD");
 
@@ -455,13 +455,11 @@ public class SettingsControllerTest {
                 .andDo(print());
 
         assertEquals(1L, memberRepository.countActiveMember());
-        assertEquals(1L, memberRepository.count());
     }
 
     @DisplayName("회원탈퇴 요청시 RequestBody 에 내용은 필수다")
     @Test
-    void test221902() throws Exception {
-
+    void test18() throws Exception {
         //given
         memberFactory.createMember("deleteMemberE");
 
@@ -476,67 +474,36 @@ public class SettingsControllerTest {
         assertEquals(1L, memberRepository.countActiveMember());
     }
 
-    @DisplayName("탈퇴한 회원의 아이디로 회원가입할수 없다")
+    /**
+     * 내 정보 조회
+     */
+    @DisplayName("내 회원 정보 조회")
     @Test
-    void test3() throws Exception {
+    void test19() throws Exception {
         //given
-        Member member = Member.builder()
-                .username("deletedMember123")
-                .email("1234B@naver.com")
-                .password("password1234!")
-                .build();
-        memberRepository.save(member);
-        memberRepository.delete(member);
-
-        //when
-        String json = objectMapper.writeValueAsString(SignUp.builder()
-                .username("deletedMember123")
-                .email("newMember@naver.com")
-                .password("pwd12345!!")
-                .passwordConfirm("pwd12345!!")
-                .build());
+        Member member = memberFactory.createMember("QQQ");
 
         //then
-        mockMvc.perform(post("/join")
-                        .contentType(APPLICATION_JSON)
-                        .content(json)
+        mockMvc.perform(get("/settings/profile")
+                        .with(user("QQQ").roles("MEMBER"))
                         .with(csrf()))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("이미 사용중이거나 탈퇴한 아이디입니다."))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value(member.getUsername()))
+                .andExpect(jsonPath("$.email").value(member.getEmail()))
                 .andDo(print());
-
-        assertEquals(0L, memberRepository.countActiveMember());
     }
 
-    @DisplayName("탈퇴한 회원의 이메일로 회원가입할수 없다")
+    @DisplayName("타인의 회원정보를 조회할수 없다")
     @Test
-    void test32() throws Exception {
+    void test20() throws Exception {
         //given
-        Member member = Member.builder()
-                .username("usernameQWE")
-                .email("1234A@naver.com")
-                .password("password1234!")
-                .build();
-        memberRepository.save(member);
-        memberRepository.delete(member);
-
-        //when
-        String json = objectMapper.writeValueAsString(SignUp.builder()
-                .username("newUser")
-                .email("1234A@naver.com")
-                .password("pwd12345!!")
-                .passwordConfirm("pwd12345!!")
-                .build());
+        Member member = memberFactory.createMember("ZXCg");
 
         //then
-        mockMvc.perform(post("/join")
-                        .contentType(APPLICATION_JSON)
-                        .content(json)
+        mockMvc.perform(get("/settings/profile")
+                        .with(user("SSS").roles("MEMBER"))
                         .with(csrf()))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("이미 사용중이거나 탈퇴한 이메일입니다."))
-                .andDo(print());
-
-        assertEquals(0L, memberRepository.countActiveMember());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("사용자를 찾을수 없습니다."));
     }
 }

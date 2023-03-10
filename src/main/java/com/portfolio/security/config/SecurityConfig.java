@@ -55,8 +55,9 @@ public class SecurityConfig {
 
                 .authorizeRequests()
                 .antMatchers("/join", "/api/login").permitAll()
-                .antMatchers(GET, "/member/**", "/posts/**").permitAll()
+                .antMatchers(GET, "/member/**", "/posts/**", "/comments/**", "/board/**", "/likes/**").permitAll()
                 .antMatchers("/settings/**").hasRole("MEMBER")
+                .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/login").denyAll()
                 .anyRequest().authenticated()
 
@@ -68,7 +69,6 @@ public class SecurityConfig {
                 .authenticationEntryPoint(authenticationEntryPoint())
                 .accessDeniedHandler(accessDeniedHandler())
 
-//                .and().csrf().disable()
                 .and()
                 .cors()
                 .configurationSource(corsConfigurationSource());

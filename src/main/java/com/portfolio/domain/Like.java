@@ -31,7 +31,14 @@ public class Like extends BaseEntity{
 
     @Builder
     public Like(Post post, Member member) {
-        this.post = post;
         this.member = member;
+
+        //양방향 연간관계 설정
+        bindPostAndComment(post);
+    }
+
+    private void bindPostAndComment(Post post) {
+        this.post = post;
+        post.getLikes().add(this);
     }
 }

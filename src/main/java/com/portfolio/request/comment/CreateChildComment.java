@@ -19,7 +19,6 @@ public class CreateChildComment {
     @Size(max = 100, message = "댓글은 100글자 이하로 작성해주세요")
     private String content;
 
-
     @Builder
     public CreateChildComment(Long parentCommentId, String content) {
         this.parentCommentId = parentCommentId;

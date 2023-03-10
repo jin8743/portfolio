@@ -1,11 +1,9 @@
 package com.portfolio.exception;
 
-import com.portfolio.response.ErrorResponse;
+import com.portfolio.response.error.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -16,7 +14,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.Arrays;
 
 import static org.springframework.http.HttpStatus.*;
-import static org.springframework.http.MediaType.*;
 
 
 @RestControllerAdvice

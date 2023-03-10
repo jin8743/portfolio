@@ -2,6 +2,7 @@ package com.portfolio.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.portfolio.domain.Comment;
+import com.portfolio.domain.Member;
 import com.portfolio.repository.member.MemberRepository;
 import com.portfolio.request.member.Login;
 import com.portfolio.request.member.SignUp;
@@ -218,10 +219,69 @@ public class MainControllerTest {
                 .andDo(print());
     }
 
+    @DisplayName("탈퇴한 계정의 아이디와 비밀번호로 로그인 할수 없다")
+    @Test
+    void test7() throws Exception {
+        //given
+        memberService.saveNewMember(SignUp.builder()
+                .username("username123Q")
+                .email("12345QWER@naver.com")
+                .password("password!")
+                .passwordConfirm("password!")
+                .build());
+
+        Member member = memberRepository.findByUsername("username123Q").get();
+        memberRepository.delete(member);
+
+        //when
+        String json = objectMapper.writeValueAsString(Login.builder()
+                .usernameOrEmail("username123Q")
+                .password("password!")
+                .build());
+
+        mockMvc.perform(post("/api/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized())
+                .andExpect(unauthenticated())
+                .andDo(print());
+    }
+
+    @DisplayName("탈퇴한 계정의 이메일과 비밀번호로 로그인 할수 없다")
+    @Test
+    void test8() throws Exception {
+        //given
+        memberService.saveNewMember(SignUp.builder()
+                .username("username123Q")
+                .email("abcd@naver.com")
+                .password("password!")
+                .passwordConfirm("password!")
+                .build());
+
+        Member member = memberRepository.findByUsername("username123Q").get();
+        memberRepository.delete(member);
+
+        //when
+        String json = objectMapper.writeValueAsString(Login.builder()
+                .usernameOrEmail("abcd@naver.com")
+                .password("password!")
+                .build());
+
+        mockMvc.perform(post("/api/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized())
+                .andExpect(unauthenticated())
+                .andDo(print());
+    }
+
+
     @WithMockUser
     @DisplayName("로그아웃")
     @Test
-    void test7() throws Exception {
+    void test9() throws Exception {
         mockMvc.perform(post("/logout")
                         .with(csrf()))
                 .andExpect(status().isOk())

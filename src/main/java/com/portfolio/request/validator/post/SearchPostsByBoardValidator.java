@@ -24,6 +24,7 @@ public class SearchPostsByBoardValidator implements Validator {
     @Override
     public void validate(Object target, Errors errors) {
         SearchPostsByBoard request = (SearchPostsByBoard) target;
+
         if (boardRepository
                 .existsByBoardName(request.getBoard()) == false) {
             throw new CustomNotFoundException(BOARD_NOT_FOUND);

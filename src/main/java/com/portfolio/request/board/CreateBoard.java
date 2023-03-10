@@ -3,12 +3,14 @@ package com.portfolio.request.board;
 import com.portfolio.domain.Board;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 @Getter
+@NoArgsConstructor
 public class CreateBoard {
 
     @NotBlank(message = "게시판 이름을 입력해주세요")

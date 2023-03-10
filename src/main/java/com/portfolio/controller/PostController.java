@@ -26,8 +26,6 @@ public class PostController {
 
     private final SearchPostsByBoardValidator searchPostsByBoardValidator;
 
-    private final SearchPostToEditValidator searchPostToEditValidator;
-
     private final EditPostValidator editPostValidator;
 
     private final DeletePostValidator deletePostValidator;
@@ -45,11 +43,6 @@ public class PostController {
     @InitBinder("searchPostsByBoard")
     public void initBinder2(WebDataBinder webDataBinder) {
         webDataBinder.addValidators(searchPostsByBoardValidator);
-    }
-
-    @InitBinder("searchPostToEdit")
-    public void initBinder3(WebDataBinder webDataBinder) {
-        webDataBinder.addValidators(searchPostToEditValidator);
     }
 
     @InitBinder("editPost")
@@ -77,30 +70,42 @@ public class PostController {
         return postService.findSinglePost(request);
     }
 
-    // 특정 게시판에 작성된 글 페이징 조회
+    //  전체글 페이징 조회
     @GetMapping("/posts/view")
+    public List<PostResponse> postsList(Page request) {
+        return postService.findPosts(request);
+    }
+
+    // 특정 게시판에 작성된 글 페이징 조회
+    @GetMapping("/posts/board/view")
     public List<BoardPostResponse> boardPosts(@Validated SearchPostsByBoard request) {
         return postService.findPostsByBoard(request);
     }
 
-
     //특정 회원이 작성한 글 페이징 조회
+    /** 탈퇴 회원의 작성 글도 조회 가능 */
     @GetMapping("/member/{username}/posts")
-    public List<MemberPostResponse> findPostsByMember(@PathVariable String username, Page page) {
-        return postService.findPostsByMember(username, page);
+    public List<MemberPostResponse> findPostsByMember(@PathVariable String username, Page request) {
+        return postService.findPostsByMember(username, request);
+    }
+
+    //특정 회원이 댓글단 글 페이징 조회
+    /** 탈퇴 회원이 댓글단 글은 조회 불가능*/
+    @GetMapping("/member/{username}/commentPosts")
+    public List<MemberCommentPostResponse> findPostsCommentedByMember(@PathVariable String username, Page request) {
+        return postService.findPostsCommentedByMember(username, request);
     }
 
     //내가 좋아요 누른 글 페이징 조회
-    /** 해당 회원 본인만 확인 가능함. 타인은 확인 시도시 인가 예외 발생 */
+     /** 해당 회원 본인만 확인 가능함. 타인이 조회 시도시 인가 예외 발생 */
     @GetMapping("/member/{username}/likes")
-    public List<MyLikedPostResponse> findLikedPosts(@PathVariable String username, Page page) {
+    public List<MyLikedPostResponse> findLikedPosts(@PathVariable String username, Page request) {
         validateUsername(username);
-        return postService.findMyLikedPosts(page);
+        return postService.findMyLikedPosts(request);
     }
 
 
     /** 수정 기능 */
-
     //글 단건 수정
     @PatchMapping("/posts")
     public void update(@Validated @RequestBody EditPost request) {

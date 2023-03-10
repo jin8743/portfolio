@@ -1,11 +1,9 @@
 package com.portfolio.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.portfolio.controller.factory.BoardFactory;
-import com.portfolio.controller.factory.LikeFactory;
-import com.portfolio.controller.factory.MemberFactory;
-import com.portfolio.controller.factory.PostFactory;
+import com.portfolio.controller.factory.*;
 import com.portfolio.domain.Board;
+import com.portfolio.domain.Comment;
 import com.portfolio.domain.Member;
 import com.portfolio.repository.board.BoardRepository;
 import com.portfolio.repository.comment.CommentRepository;
@@ -70,8 +68,10 @@ public class PostControllerTest {
     @Autowired
     private LikeFactory likeFactory;
 
+    @Autowired
+    private CommentFactory commentFactory;
 
-    @AfterEach
+    @BeforeEach
     void clear() {
         likeRepository.deleteAll();
         commentRepository.deleteAll();
@@ -83,17 +83,16 @@ public class PostControllerTest {
     /**
      * 글 단건 작성
      */
-
     @DisplayName("글 작성 (댓글 작성 허용)")
     @Test
     void test1() throws Exception {
         //given
-        boardFactory.createBoard("free");
+        boardFactory.createBoard("A");
         memberFactory.createMember("user1234");
 
         //when
         String json = objectMapper.writeValueAsString(CreatePost.builder()
-                .boardName("free")
+                .boardName("A")
                 .title("제목입니다")
                 .content("내용입니다")
                 .commentsAllowed(true)
@@ -119,12 +118,12 @@ public class PostControllerTest {
     @Test
     void test2() throws Exception {
         //given
-        boardFactory.createBoard("free");
+        boardFactory.createBoard("B");
         memberFactory.createMember("user");
 
         //when
         String json = objectMapper.writeValueAsString(CreatePost.builder()
-                .boardName("free")
+                .boardName("B")
                 .title("제목입니다")
                 .content("내용입니다")
                 .commentsAllowed(false)
@@ -147,12 +146,11 @@ public class PostControllerTest {
     }
 
 
-
     @DisplayName("로그인을 하지 않은 상태로 글을 작성할수 없다")
     @Test
     void test3() throws Exception {
         //given
-        boardFactory.createBoard("free");
+        boardFactory.createBoard("C");
         memberFactory.createMember("user1234q");
 
         //when
@@ -220,12 +218,12 @@ public class PostControllerTest {
     @Test
     void test6() throws Exception {
         //given
-        boardFactory.createBoard("free");
+        boardFactory.createBoard("D");
         memberFactory.createMember("userN");
 
         //when
         String json = objectMapper.writeValueAsString(CreatePost.builder()
-                .boardName("free")
+                .boardName("D")
                 .title("제목입니다")
                 .content("내용입니다")
                 .commentsAllowed(null)
@@ -248,12 +246,12 @@ public class PostControllerTest {
     @Test
     void test7() throws Exception {
         //given
-        boardFactory.createBoard("free");
+        boardFactory.createBoard("E");
         memberFactory.createMember("userL");
 
         //when
         String json = objectMapper.writeValueAsString(CreatePost.builder()
-                .boardName("free")
+                .boardName("E")
                 .title("제목입니다")
                 .content("내용입니다")
                 .build());
@@ -275,7 +273,7 @@ public class PostControllerTest {
     @Test
     void test8() throws Exception {
         //given
-        boardFactory.createBoard("free");
+        boardFactory.createBoard("F");
         memberFactory.createMember("username2");
 
         CreatePost createPost = CreatePost.builder()
@@ -304,7 +302,7 @@ public class PostControllerTest {
     @Test
     void test9() throws Exception {
         //given
-        boardFactory.createBoard("free");
+        boardFactory.createBoard("G");
         memberFactory.createMember("user2");
 
         CreatePost createPost = CreatePost.builder()
@@ -359,11 +357,11 @@ public class PostControllerTest {
     @Test
     void test10() throws Exception {
         //given
-        boardFactory.createBoard("free");
+        boardFactory.createBoard("H");
         memberFactory.createMember("memberQ");
 
         String json = objectMapper.writeValueAsString(CreatePost.builder()
-                .boardName("free")
+                .boardName("H")
                 .title(null)
                 .content("내용입니다")
                 .build());
@@ -386,11 +384,11 @@ public class PostControllerTest {
     @Test
     void test11() throws Exception {
         //given
-        boardFactory.createBoard("free");
+        boardFactory.createBoard("I");
         memberFactory.createMember("memberA");
 
         String json = objectMapper.writeValueAsString(CreatePost.builder()
-                .boardName("free")
+                .boardName("I")
                 .content("내용입니다")
                 .build());
 
@@ -413,11 +411,11 @@ public class PostControllerTest {
     @Test
     void test12() throws Exception {
         //given
-        boardFactory.createBoard("free");
+        boardFactory.createBoard("J");
         memberFactory.createMember("memberB");
 
         String json = objectMapper.writeValueAsString(CreatePost.builder()
-                .boardName("free")
+                .boardName("J")
                 .title("제목입니다")
                 .content(null)
                 .build());
@@ -440,11 +438,11 @@ public class PostControllerTest {
     @Test
     void test13() throws Exception {
         //given
-        boardFactory.createBoard("free");
+        boardFactory.createBoard("K");
         memberFactory.createMember("memberC");
 
         String json = objectMapper.writeValueAsString(CreatePost.builder()
-                .boardName("free")
+                .boardName("K")
                 .title("제목입니다")
                 .build());
 
@@ -463,23 +461,22 @@ public class PostControllerTest {
     }
 
 
-
-    /** 글 단건 조회
-     * (글에 댓글과 좋아요가 없는 경우)
+    /**
+     * 글 단건 조회
      */
-
     @DisplayName("글 단건 조회")
     @Test
     void test14() throws Exception {
         //given
-        Board board = boardFactory.createBoard("free");
+        Board board = boardFactory.createBoard("L");
         Member member = memberFactory.createMember("userG");
         Post post = postFactory.createPost(member, board, false);
 
         //then
         mockMvc.perform(
-                get("/posts?id="+ post.getId()))
-                .andExpect(jsonPath("$.boardName").value("free"))
+                        get("/posts?id=" + post.getId()))
+                .andExpect(jsonPath("$.boardName").value("L"))
+                .andExpect(jsonPath("$.nickname").value("자유게시판 L"))
                 .andExpect(jsonPath("$.postId").value(post.getId()))
                 .andExpect(jsonPath("$.title").value("제목"))
                 .andExpect(jsonPath("$.content").value("내용"))
@@ -489,7 +486,7 @@ public class PostControllerTest {
                 .andDo(print());
 
         mockMvc.perform(
-                get("/posts?id="+ post.getId() + "&ABC=!@#$?&가나다=2"))
+                        get("/posts?id=" + post.getId() + "&ABC=!@#$?&가나다=2"))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
@@ -498,7 +495,7 @@ public class PostControllerTest {
     @Test
     void test124() throws Exception {
         //given
-        Board board = boardFactory.createBoard("free");
+        Board board = boardFactory.createBoard("M");
         Member member = memberFactory.createMember("user5");
         Post post = postFactory.createPost(member, board, false);
 
@@ -515,7 +512,7 @@ public class PostControllerTest {
     @Test
     void test1224() throws Exception {
         //given
-        Board board = boardFactory.createBoard("free");
+        Board board = boardFactory.createBoard("N");
         Member member = memberFactory.createMember("userW");
         Post post = postFactory.createPost(member, board, false);
 
@@ -561,98 +558,95 @@ public class PostControllerTest {
     }
 
 
-
-
     /**
      * 특정 게시판에 작성된 글 페이징 조회
-     * (글에 댓글이 없는 경우)
+     * (글에 댓글과 좋아요가 없는 경우)
      */
-
-    @DisplayName("특정 게시판에 작성된 글 페이징 조회")
+    @DisplayName("특정 게시판에 작성된 글 목록 조회")
     @Test
     void test17() throws Exception {
         //given
-        Board board = boardFactory.createBoard("free");
+        Board board = boardFactory.createBoard("O");
         IntStream.rangeClosed(1, 30).forEach(i -> {
             Member member = memberFactory.createMember("member " + i);
             postFactory.createPost(member, board, true);
         });
 
         //then
-        mockMvc.perform(get("/posts/view?board=free&page=1"))
+        mockMvc.perform(get("/posts/board/view?board=O&page=1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()", is(20)))
                 .andExpect(jsonPath("$[0].title").value("제목"))
                 .andExpect(jsonPath("$[0].username").value("member 30"))
                 .andDo(print());
 
-        mockMvc.perform(get("/posts/view?board=free&page=1&list_num=10"))
+        mockMvc.perform(get("/posts/board/view?board=O&page=1&list_num=10"))
                 .andExpect(status().isOk())
                 .andDo(print());
 
-        mockMvc.perform(get("/posts/view?board=free&page=2&list_num=10&a@#!@%@a=w  sw가나다"))
+        mockMvc.perform(get("/posts/board/view?board=O&page=2&list_num=10&a@#!@%@a=w  sw가나다"))
                 .andExpect(status().isOk())
                 .andDo(print());
 
-        mockMvc.perform(get("/posts/view?board=free&page=10&list_num=10&a@#!@%@a=w  sw가나다"))
+        mockMvc.perform(get("/posts/board/view?board=O&page=10&list_num=10&a@#!@%@a=w  sw가나다"))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
 
-    @DisplayName("특정 게시판에 작성된 글 여러개 조회 잘못된 요청 (필수 파라미터 누락 또는 잘못된 형식)")
+    @DisplayName("특정 게시판에 작성된 글 목록 조회 잘못된 요청 (필수 파라미터 누락 또는 잘못된 형식)")
     @Test
     void test18() throws Exception {
-        mockMvc.perform(get("/posts/view"))
+        mockMvc.perform(get("/posts/board/view"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("알수 없는 게시판 이름 입니다"))
                 .andDo(print());
 
-        mockMvc.perform(get("/posts/view?1@ #ㄱㄴㄷ ^(ABC"))
+        mockMvc.perform(get("/posts/board/view?1@ #ㄱㄴㄷ ^(ABC"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("알수 없는 게시판 이름 입니다"))
                 .andDo(print());
     }
 
-    @DisplayName("특정 게시판의 글 조회시 페이지 정보가 없거나 잘못된 경우 첫 페이지를 가져온다")
+    @DisplayName("특정 게시판의 글 목록 조회시 페이지 정보가 없거나 잘못된 경우 첫 페이지를 가져온다")
     @Test
     void test19() throws Exception {
         //given
-        Board board = boardFactory.createBoard("free");
+        Board board = boardFactory.createBoard("P");
         IntStream.rangeClosed(1, 30).forEach(i -> {
             Member member = memberFactory.createMember("member1 " + i);
             postFactory.createPost(member, board, true);
         });
 
         //then
-        mockMvc.perform(get("/posts/view?board=free"))
+        mockMvc.perform(get("/posts/board/view?board=P"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()", is(20)))
                 .andExpect(jsonPath("$[0].title").value("제목"))
                 .andExpect(jsonPath("$[0].username").value("member1 30"))
                 .andDo(print());
 
-        mockMvc.perform(get("/posts/view?board=free&page=!@#$%^ ㄱ"))
+        mockMvc.perform(get("/posts/board/view?board=P&page=!@#$%^ ㄱ"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()", is(20)))
                 .andExpect(jsonPath("$[0].title").value("제목"))
                 .andExpect(jsonPath("$[0].username").value("member1 30"))
                 .andDo(print());
 
-        mockMvc.perform(get("/posts/view?board=free&a@=!@#$%^ ㄱ"))
+        mockMvc.perform(get("/posts/board/view?board=P&a@=!@#$%^ ㄱ"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()", is(20)))
                 .andExpect(jsonPath("$[0].title").value("제목"))
                 .andExpect(jsonPath("$[0].username").value("member1 30"))
                 .andDo(print());
 
-        mockMvc.perform(get("/posts/view?board=free&page=-13"))
+        mockMvc.perform(get("/posts/board/view?board=P&page=-13"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()", is(20)))
                 .andExpect(jsonPath("$[0].title").value("제목"))
                 .andExpect(jsonPath("$[0].username").value("member1 30"))
                 .andDo(print());
 
-        mockMvc.perform(get("/posts/view?board=free&page=100000000000000000000000000000000000000000000000000000000000000000000"))
+        mockMvc.perform(get("/posts/board/view?board=P&page=100000000000000000000000000000000000000000000000000000000000000000000"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()", is(20)))
                 .andExpect(jsonPath("$[0].title").value("제목"))
@@ -664,19 +658,19 @@ public class PostControllerTest {
     @Test
     void test20() throws Exception {
         //given
-        Board board = boardFactory.createBoard("free");
+        Board board = boardFactory.createBoard("Q");
         IntStream.rangeClosed(1, 30).forEach(i -> {
             Member member = memberFactory.createMember("member2 " + i);
             postFactory.createPost(member, board, true);
         });
 
         //then
-        mockMvc.perform(get("/posts/view?board=free&size=10"))
+        mockMvc.perform(get("/posts/board/view?board=Q&size=10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()", is(10)))
                 .andDo(print());
 
-        mockMvc.perform(get("/posts/view?board=free&size=15"))
+        mockMvc.perform(get("/posts/board/view?board=Q&size=15"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()", is(15)))
                 .andDo(print());
@@ -686,24 +680,24 @@ public class PostControllerTest {
     @Test
     void test21() throws Exception {
         //given
-        Board board = boardFactory.createBoard("free");
+        Board board = boardFactory.createBoard("R");
         IntStream.rangeClosed(1, 30).forEach(i -> {
             Member member = memberFactory.createMember("member3 " + i);
             postFactory.createPost(member, board, true);
         });
 
         //then
-        mockMvc.perform(get("/posts/view?board=free&page=1"))
+        mockMvc.perform(get("/posts/board/view?board=R&page=1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()", is(20)))
                 .andDo(print());
 
-        mockMvc.perform(get("/posts/view?board=free&page=1&size=a!2@3 가나다"))
+        mockMvc.perform(get("/posts/board/view?board=R&page=1&size=a!2@3 가나다"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()", is(20)))
                 .andDo(print());
 
-        mockMvc.perform(get("/posts/view?board=free&page=1&!@#$=@DF@ 가나다라"))
+        mockMvc.perform(get("/posts/board/view?board=R&page=1&!@#$=@DF@ 가나다라"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()", is(20)))
                 .andDo(print());
@@ -713,19 +707,19 @@ public class PostControllerTest {
     @Test
     void test22() throws Exception {
         //given
-        Board board = boardFactory.createBoard("free");
+        Board board = boardFactory.createBoard("S");
         IntStream.rangeClosed(1, 50).forEach(i -> {
             Member member = memberFactory.createMember("member4 " + i);
             postFactory.createPost(member, board, true);
         });
 
         //then
-        mockMvc.perform(get("/posts/view?board=free&page=1&list_num=-15"))
+        mockMvc.perform(get("/posts/board/view?board=S&page=1&list_num=-15"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()", is(20)))
                 .andDo(print());
 
-        mockMvc.perform(get("/posts/view?board=free&page=2&list_num=0"))
+        mockMvc.perform(get("/posts/board/view?board=S&page=2&list_num=0"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()", is(20)))
                 .andDo(print());
@@ -733,26 +727,26 @@ public class PostControllerTest {
 
     @DisplayName("몇개 단위로 조회에 대한 값이 50 초과일 경우 50개씩 조회된다")
     @Test
-    void  test23() throws Exception {
+    void test23() throws Exception {
         //given
-        Board board = boardFactory.createBoard("free");
+        Board board = boardFactory.createBoard("T");
         IntStream.rangeClosed(1, 120).forEach(i -> {
             Member member = memberFactory.createMember("member5 " + i);
             postFactory.createPost(member, board, true);
         });
 
         //then
-        mockMvc.perform(get("/posts/view?board=free&page=1&size=100"))
+        mockMvc.perform(get("/posts/board/view?board=T&page=1&size=100"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()", is(50)))
                 .andDo(print());
 
-        mockMvc.perform(get("/posts/view?board=free&page=2&size=100"))
+        mockMvc.perform(get("/posts/board/view?board=T&page=2&size=100"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()", is(50)))
                 .andDo(print());
 
-        mockMvc.perform(get("/posts/view?board=free&page=3&size=100"))
+        mockMvc.perform(get("/posts/board/view?board=T&page=3&size=100"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()", is(20)))
                 .andDo(print());
@@ -761,7 +755,7 @@ public class PostControllerTest {
     @DisplayName("존재하지 않는 게시판의 글은 조회할수 없다")
     @Test
     void test24() throws Exception {
-        mockMvc.perform(get("/posts/view?board={boardName}", "1234"))
+        mockMvc.perform(get("/posts/board/view?board={boardName}", "1234"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("404"))
                 .andExpect(jsonPath("$.message").value("알수 없는 게시판 이름 입니다"))
@@ -772,27 +766,130 @@ public class PostControllerTest {
     @Test
     void test25() throws Exception {
         //when
-        boardFactory.createBoard("free");
+        boardFactory.createBoard("U");
 
         //then
-        mockMvc.perform(get("/posts/view?board=free"))
+        mockMvc.perform(get("/posts/board/view?board=U"))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
 
+    @DisplayName("특정 게시판의 글 조회시 삭제된 글은 조회되지 않는다")
+    @Test
+    void test252() throws Exception {
+        //when
+        Board board = boardFactory.createBoard("ABCD");
+        Member member = memberFactory.createMember("youngjin8743");
+        IntStream.rangeClosed(1, 120).forEach(i -> {
+            Post post = postFactory.createPost(member, board, true);
+            postRepository.delete(post);
+        });
+
+        postFactory.createPost(member, board, true);
+
+        //then
+        mockMvc.perform(get("/posts/board/view?board=ABCD"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andDo(print());
+    }
+
+
+    /** 특정 게시판에 작성된 글 페이징 조회
+     *  (댓글이 있는 경우)
+     */
+
+    @DisplayName("특정 게시판에 작성된 글목록 조회 (댓글만 있고 대댓글은 없는 경우)")
+    @Test
+    void test12127() throws Exception {
+        //given
+        Board board = boardFactory.createBoard("BB");
+        IntStream.rangeClosed(1, 30).forEach(i -> {
+            Member member1 = memberFactory.createMember("memberW " +  + i);
+            Member member2 = memberFactory.createMember("memberK " +  + i);
+            Post post = postFactory.createPost(member1, board, true);
+            IntStream.rangeClosed(1, 5).forEach(e -> {
+                commentFactory.createParentComment(post, member1, i + " 번쨰 글의 댓글" + e);
+                commentFactory.createParentComment(post, member2, i + " 번쨰 글의 댓글" + e);
+            });
+        });
+
+        //then
+        mockMvc.perform(get("/posts/board/view?board=BB&page=1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()", is(20)))
+                .andExpect(jsonPath("$.[0].nickname").value("자유게시판 BB"))
+                .andExpect(jsonPath("$.[0].totalComments").value(10))
+                .andDo(print());
+    }
+
+    @DisplayName("특정 게시판에 작성된 글목록 조회 (댓글과 대댓글 모두 있는 경우)")
+    @Test
+    void test1212127() throws Exception {
+        //given
+        Board board = boardFactory.createBoard("YUI");
+        IntStream.rangeClosed(1, 30).forEach(i -> {
+            Member member1 = memberFactory.createMember("userH " +  + i);
+            Member member2 = memberFactory.createMember("userJ " +  + i);
+            Post post = postFactory.createPost(member1, board, true);
+            IntStream.rangeClosed(1, 5).forEach(e -> {
+                Comment parentComment1 = commentFactory.createParentComment(post, member1, i + " 번쨰 글의 댓글" + e);
+                Comment parentComment2 = commentFactory.createParentComment(post, member2, i + " 번쨰 글의 댓글" + e);
+                commentFactory.createChildComment(post, member1, parentComment1, "대댓글");
+                commentFactory.createChildComment(post, member2, parentComment2, "대댓글");
+
+            });
+        });
+
+        //then
+        mockMvc.perform(get("/posts/board/view?board=YUI&page=1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()", is(20)))
+                .andExpect(jsonPath("$.[0].nickname").value("자유게시판 YUI"))
+                .andExpect(jsonPath("$.[0].totalComments").value(20))
+                .andDo(print());
+    }
+
+    @DisplayName("Soft Delete 처리된 댓글은 총 댓글수에 포함되지 않는다")
+    @Test
+    void test121227() throws Exception {
+        //given
+        Board board = boardFactory.createBoard("QWEA");
+        IntStream.rangeClosed(1, 30).forEach(i -> {
+            Member member1 = memberFactory.createMember("userQQQ " +  + i);
+            Member member2 = memberFactory.createMember("userJJJ " + +i);
+
+            Post post = postFactory.createPost(member1, board, true);
+            IntStream.rangeClosed(1, 5).forEach(e -> {
+                Comment parentComment1 = commentFactory.createParentComment(post, member1, i + " 번쨰 글의 댓글" + e);
+                Comment parentComment2 = commentFactory.createParentComment(post, member2, i + " 번쨰 글의 댓글" + e);
+                commentFactory.createChildComment(post, member1, parentComment1, "대댓글");
+                commentFactory.createChildComment(post, member2, parentComment2, "대댓글");
+
+                commentRepository.delete(parentComment1);
+            });
+        });
+
+        //then
+        mockMvc.perform(get("/posts/board/view?board=QWEA&page=1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()", is(20)))
+                .andExpect(jsonPath("$.[0].nickname").value("자유게시판 QWEA"))
+                .andExpect(jsonPath("$.[0].totalComments").value(15))
+                .andDo(print());
+    }
 
 
     /**
-     * 특정 회원이 작성한 글 페이징 조회
+     * 특정 회원이 작성한 글 목록 조회
      * (글에 댓글이 없는 경우)
      */
-
-    @DisplayName("특정 회원이 작성한 글 여러개 조회")
+    @DisplayName("특정 회원이 작성한 글 목록 조회")
     @Test
     void test26() throws Exception {
         //given
-        Board board = boardFactory.createBoard("free");
-        Member member = memberFactory.createMember("account123");
+        Board board = boardFactory.createBoard("V");
+        Member member = memberFactory.createMember("account123Q");
         IntStream.rangeClosed(1, 30).forEach(i -> {
             postFactory.createPost(member, board, true);
         });
@@ -802,7 +899,6 @@ public class PostControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()", is(20)))
                 .andExpect(jsonPath("$[0].title").value("제목"))
-                .andExpect(jsonPath("$[0].boardName").value("free"))
                 .andDo(print());
 
         mockMvc.perform(get("/member/{username}/posts?page=2", member.getUsername()))
@@ -814,11 +910,11 @@ public class PostControllerTest {
                 .andDo(print());
     }
 
-    @DisplayName("특정 회원이 작성한 글 페이징 조회시 페이지 정보가 없거나 잘못된 경우 1 페이지가 조회된다")
+    @DisplayName("특정 회원이 작성한 글 목록 조회시 페이지 정보가 없거나 잘못된 경우 1 페이지가 조회된다")
     @Test
     void test27() throws Exception {
         //given
-        Board board = boardFactory.createBoard("free");
+        Board board = boardFactory.createBoard("W");
         Member member = memberFactory.createMember("user9");
         IntStream.rangeClosed(1, 30).forEach(i -> {
             postFactory.createPost(member, board, true);
@@ -846,7 +942,7 @@ public class PostControllerTest {
                 .andDo(print());
     }
 
-    @DisplayName("존재하지 않는 회원의 작성글은 조회할수 없다")
+    @DisplayName("존재하지 않는 회원의 작성글 목록을 조회할수 없다")
     @Test
     void test28() throws Exception {
         mockMvc.perform(get("/member/{username}/posts", "1234"))
@@ -856,7 +952,7 @@ public class PostControllerTest {
                 .andDo(print());
     }
 
-    @DisplayName("존재하지 않는 회원의 작성글은 조회할수 없다 2")
+    @DisplayName("존재하지 않는 회원의 작성글 목록을 조회할수 없다 2")
     @Test
     void test228() throws Exception {
         mockMvc.perform(get("/member//posts"))
@@ -865,23 +961,23 @@ public class PostControllerTest {
     }
 
 
-    @DisplayName("탈퇴한 회원의 작성글을 한꺼번에 조회할수 없다")
+    @DisplayName("탈퇴한 회원의 작성글 목록도 조회 가능하다")
     @Test
     void test928() throws Exception {
+        Board board = boardFactory.createBoard("X");
         Member member = memberFactory.createMember("deleteMember");
-        Board board = boardFactory.createBoard("free");
         postFactory.createPost(member, board, true);
         memberRepository.delete(member);
 
         mockMvc.perform(get("/member/{username}/posts", "deleteMember"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("404"))
-                .andExpect(jsonPath("$.message").value("사용자를 찾을수 없습니다."))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.[0].title").value("제목"))
+                .andExpect(jsonPath("$.[0].totalComments").value(0))
                 .andDo(print());
     }
 
 
-    @DisplayName("아무 글도 작성하지 않은 회원의 작성글 조회시 빈 ArrayList 가 반환된다")
+    @DisplayName("아무 글도 작성하지 않은 회원의 작성글 목록 조회시 빈 ArrayList 가 반환된다")
     @Test
     void test29() throws Exception {
         //when
@@ -893,11 +989,83 @@ public class PostControllerTest {
                 .andDo(print());
     }
 
+    @DisplayName("특정 회원의 작성 글 조회시 삭제된 글은 조회되지 않는다")
+    @Test
+    void test25232() throws Exception {
+        //when
+        Board board = boardFactory.createBoard("ABCDE");
+        Member member = memberFactory.createMember("youngjin1234");
+        IntStream.rangeClosed(1, 120).forEach(i -> {
+            Post post = postFactory.createPost(member, board, true);
+            postRepository.delete(post);
+        });
+
+        postFactory.createPost(member, board, true);
+
+        //then
+        mockMvc.perform(get("/member/{username}/posts", "youngjin1234"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andDo(print());
+    }
+
+    /** 특정 회원이 작성한 글 페이징 조회
+     * (댓글이 있는 경우)
+     */
+    @DisplayName("특정 회원이 작성한 글 여러개 조회 (댓글만 있고 대댓글은 없는 경우)")
+    @Test
+    void test2126() throws Exception {
+        //given
+        Board board = boardFactory.createBoard("DD");
+        Member member = memberFactory.createMember("Qaccount123");
+        IntStream.rangeClosed(1, 30).forEach(i -> {
+            Post post = postFactory.createPost(member, board, true);
+            IntStream.rangeClosed(1, 5).forEach(e -> {
+                Member userA = memberFactory.createMember("accountVA " + i + " " + e);
+                commentFactory.createParentComment(post, member, "댓글");
+                commentFactory.createParentComment(post, userA, "댓글");
+                commentFactory.createParentComment(post, userA, "댓글2");
+            });
+        });
+
+        //then
+        mockMvc.perform(get("/member/{username}/posts?page=1", member.getUsername()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()", is(20)))
+                .andExpect(jsonPath("$.[0].totalComments").value(15))
+                .andDo(print());
+    }
+
+
+    @DisplayName("특정 회원이 작성한 글 여러개 조회 (댓글과 대댓글은 모두 있는 경우)")
+    @Test
+    void test21226() throws Exception {
+        //given
+        Board board = boardFactory.createBoard("EE");
+        Member member = memberFactory.createMember("account123");
+        IntStream.rangeClosed(1, 30).forEach(i -> {
+            Post post = postFactory.createPost(member, board, true);
+            IntStream.rangeClosed(1, 4).forEach(e -> {
+                Member userA = memberFactory.createMember("accountV " + i + " " + e);
+                Comment parentComment = commentFactory.createParentComment(post, member, "댓글");
+                commentFactory.createParentComment(post, userA, "댓글");
+                commentFactory.createChildComment(post, userA, parentComment, "대댓글");
+            });
+        });
+
+        //then
+        mockMvc.perform(get("/member/{username}/posts?page=1", member.getUsername()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()", is(20)))
+                .andDo(print());
+    }
+
+
     /**
-     * 내가 좋아요 누른글 페이징 조회
+     * 내가 좋아요 누른글 목록 조회
      * (댓글 없는 경우)
      */
-    @DisplayName("내가 좋아요 누른글 페이징 조회")
+    @DisplayName("내가 좋아요 누른글 목록 조회")
     @Test
     void test11231254() throws Exception {
         //given
@@ -920,15 +1088,15 @@ public class PostControllerTest {
                 .andDo(print());
     }
 
-    @DisplayName("다른 이용자가 내가 좋아요 누른 글 목록을 확인할수 없다")
+    @DisplayName("내가 좋아요 누른 글 목록을 다른 이용자가 조회 할수 없다")
     @Test
     void test112231254() throws Exception {
         //given
         Member member = memberFactory.createMember("likeMemberQ");
 
         IntStream.rangeClosed(1, 10).forEach(i -> {
-            Board board = boardFactory.createBoard("free " + i);
-            Member likeMember = memberFactory.createMember("newMemberD " + i);
+            Board board = boardFactory.createBoard("X " + i);
+            Member likeMember = memberFactory.createMember("newMemberJ " + i);
             IntStream.rangeClosed(1, 10).forEach(e -> {
                 Post post = postFactory.createPost(likeMember, board, true);
                 likeFactory.createLike(post, member);
@@ -945,15 +1113,15 @@ public class PostControllerTest {
                 .andDo(print());
     }
 
-    @DisplayName("내가 좋아요 누른글 페이징 조회시 페이지 정보가 없거나 잘못된 경우 1 페이지가 조회된다")
+    @DisplayName("내가 좋아요 누른글 목록 조회시 페이지 정보가 없거나 잘못된 경우 1 페이지가 조회된다")
     @Test
     void test254() throws Exception {
         //given
         Member member = memberFactory.createMember("likeMemberB");
 
         IntStream.rangeClosed(1, 10).forEach(i -> {
-            Board board = boardFactory.createBoard("free " + i);
-            Member likeMember = memberFactory.createMember("newMemberD " + i);
+            Board board = boardFactory.createBoard("Y" + i);
+            Member likeMember = memberFactory.createMember("likeMemberB " + i);
             IntStream.rangeClosed(1, 10).forEach(e -> {
                 Post post = postFactory.createPost(likeMember, board, true);
                 likeFactory.createLike(post, member);
@@ -961,7 +1129,7 @@ public class PostControllerTest {
         });
 
         //then
-        mockMvc.perform(get("/member/{username}/likes?page=","likeMemberB")
+        mockMvc.perform(get("/member/{username}/likes?page=", "likeMemberB")
                         .with(user("likeMemberB")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(20))
@@ -992,24 +1160,15 @@ public class PostControllerTest {
                 .andDo(print());
     }
 
-    @DisplayName("존재하지 않는 이용자가 좋아요 누른글들을 조회할수 없다")
-    @Test
-    void test25124() throws Exception {
-        mockMvc.perform(get("/member/{username}/likes?page=1", "likeMemberC")
-                        .with(user("likeMemberA")))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.message").value("해당 권한이 없습니다"))
-                .andDo(print());
-    }
 
-    @DisplayName("좋아요 누른 글이 없다면 빈 ArrayList 가 응답된다")
+    @DisplayName("내가 좋아요 누른 글이 없다면 빈 ArrayList 가 응답된다")
     @Test
     void test251224() throws Exception {
         //when
         memberFactory.createMember("emptyMember");
 
         //then
-        mockMvc.perform(get("/member/{username}/likes?page=1","emptyMember")
+        mockMvc.perform(get("/member/{username}/likes?page=1", "emptyMember")
                         .with(user("emptyMember")))
                 .andExpect(status().isOk())
                 .andDo(print());
@@ -1024,8 +1183,8 @@ public class PostControllerTest {
     @Test
     void test34() throws Exception {
         //given
+        Board board = boardFactory.createBoard("Z");
         Member member = memberFactory.createMember("editmember");
-        Board board = boardFactory.createBoard("abcd");
         Post post = postFactory.createPost(member, board, false);
 
         //when
@@ -1055,8 +1214,8 @@ public class PostControllerTest {
     @Test
     void test35() throws Exception {
         //given
+        Board board = boardFactory.createBoard("AA");
         Member member = memberFactory.createMember("editMember");
-        Board board = boardFactory.createBoard("abcd");
         Post post = postFactory.createPost(member, board, true);
 
         //when
@@ -1086,8 +1245,8 @@ public class PostControllerTest {
     @Test
     void test36() throws Exception {
         //given
+        Board board = boardFactory.createBoard("FGH");
         Member member = memberFactory.createMember("edit1");
-        Board board = boardFactory.createBoard("abcd");
         Post post = postFactory.createPost(member, board, false);
 
         //when
@@ -1115,8 +1274,8 @@ public class PostControllerTest {
     @Test
     void test37() throws Exception {
         //given
+        Board board = boardFactory.createBoard("CC");
         Member member = memberFactory.createMember("edit2");
-        Board board = boardFactory.createBoard("abcd");
         Post post = postFactory.createPost(member, board, true);
 
         //when
@@ -1144,8 +1303,8 @@ public class PostControllerTest {
     @Test
     void test38() throws Exception {
         //given
+        Board board = boardFactory.createBoard("ZXC");
         Member member = memberFactory.createMember("edit3");
-        Board board = boardFactory.createBoard("abcd");
         Post post = postFactory.createPost(member, board, true);
 
         //then
@@ -1167,8 +1326,8 @@ public class PostControllerTest {
     @Test
     void test39() throws Exception {
         //given
+        Board board = boardFactory.createBoard("JKL");
         Member member = memberFactory.createMember("edit4");
-        Board board = boardFactory.createBoard("abcd");
         Post post = postFactory.createPost(member, board, true);
 
         /** 글 번호 값에 숫자형식이 아닌 값이 들어간 경우 */
@@ -1196,8 +1355,8 @@ public class PostControllerTest {
     @Test
     void test40() throws Exception {
         //given
+        Board board = boardFactory.createBoard("FF");
         Member member = memberFactory.createMember("editE");
-        Board board = boardFactory.createBoard("abcd");
         Post post = postFactory.createPost(member, board, true);
 
         /** Boolean 값에 알파벳이나 문자가 들어간 경우 */
@@ -1225,8 +1384,8 @@ public class PostControllerTest {
     @Test
     void test240() throws Exception {
         //given
+        Board board = boardFactory.createBoard("GG");
         Member member = memberFactory.createMember("editAB");
-        Board board = boardFactory.createBoard("abcd");
         Post post = postFactory.createPost(member, board, true);
 
         //when
@@ -1257,8 +1416,8 @@ public class PostControllerTest {
     @DisplayName("글 수정 요청시 댓글작성 허용 여부에 대한 값 변경 요청이 없을경우 기존값 유지")
     @Test
     void test41() throws Exception {
+        Board board = boardFactory.createBoard("HH");
         Member member = memberFactory.createMember("new");
-        Board board = boardFactory.createBoard("free");
         Post post = postFactory.createPost(member, board, true);
 
         //when
@@ -1285,8 +1444,8 @@ public class PostControllerTest {
     @DisplayName("글 수정 요청시 댓글작성 허용 여부에 대한 값 변경 요청이 없을경우 기존값 유지 2")
     @Test
     void test42() throws Exception {
+        Board board = boardFactory.createBoard("QWE");
         Member member = memberFactory.createMember("321");
-        Board board = boardFactory.createBoard("free");
         Post post = postFactory.createPost(member, board, true);
 
         //when
@@ -1312,8 +1471,8 @@ public class PostControllerTest {
     @DisplayName("글 수정 요청시 댓글작성 허용 여부에 대한 값 변경 요청이 없을경우 기존값 유지 3")
     @Test
     void test43() throws Exception {
+        Board board = boardFactory.createBoard("II");
         Member member = memberFactory.createMember("ar");
-        Board board = boardFactory.createBoard("free");
         Post post = postFactory.createPost(member, board, false);
 
         //when
@@ -1340,8 +1499,8 @@ public class PostControllerTest {
     @DisplayName("글 수정 요청시 댓글작성 허용 여부에 대한 값 변경 요청이 없을경우 기존값 유지 4")
     @Test
     void test44() throws Exception {
+        Board board = boardFactory.createBoard("JJ");
         Member member = memberFactory.createMember("asd");
-        Board board = boardFactory.createBoard("free");
         Post post = postFactory.createPost(member, board, false);
 
         //when
@@ -1368,8 +1527,8 @@ public class PostControllerTest {
     @Test
     void test425() throws Exception {
         //given
+        Board board = boardFactory.createBoard("KK");
         Member member = memberFactory.createMember("jin123");
-        Board board = boardFactory.createBoard("abcd");
         Post post = postFactory.createPost(member, board, true);
 
         //when
@@ -1400,8 +1559,8 @@ public class PostControllerTest {
     @Test
     void test45() throws Exception {
         //given
+        Board board = boardFactory.createBoard("LL");
         Member member = memberFactory.createMember("jin");
-        Board board = boardFactory.createBoard("abcd");
         Post post = postFactory.createPost(member, board, true);
 
         //when
@@ -1431,8 +1590,8 @@ public class PostControllerTest {
     @Test
     void test452() throws Exception {
         //given
+        Board board = boardFactory.createBoard("MM");
         Member member = memberFactory.createMember("jinA");
-        Board board = boardFactory.createBoard("abcd");
         Post post = postFactory.createPost(member, board, true);
 
         //when
@@ -1463,8 +1622,8 @@ public class PostControllerTest {
     @Test
     void test46() throws Exception {
         //given
+        Board board = boardFactory.createBoard("NN");
         Member member = memberFactory.createMember("editMember1");
-        Board board = boardFactory.createBoard("abcd");
         Post post = postFactory.createPost(member, board, true);
 
         //when
@@ -1492,8 +1651,8 @@ public class PostControllerTest {
     @DisplayName("글 수정 요청시 내용은 필수다")
     @Test
     void test47() throws Exception {
+        Board board = boardFactory.createBoard("OO");
         Member member = memberFactory.createMember("editPost");
-        Board board = boardFactory.createBoard("abcd");
         Post post = postFactory.createPost(member, board, true);
 
         //when
@@ -1522,8 +1681,8 @@ public class PostControllerTest {
     @DisplayName("글 수정 요청시 내용은 필수다 2")
     @Test
     void test48() throws Exception {
+        Board board = boardFactory.createBoard("PP");
         Member member = memberFactory.createMember("editMember2");
-        Board board = boardFactory.createBoard("abcd");
         Post post = postFactory.createPost(member, board, true);
 
         //when
@@ -1552,8 +1711,8 @@ public class PostControllerTest {
     @Test
     void test49() throws Exception {
         //given
+        Board board = boardFactory.createBoard("QQ");
         Member member = memberFactory.createMember("usernameN");
-        Board board = boardFactory.createBoard("abcd");
         Post post = postFactory.createPost(member, board, true);
         String json = objectMapper.writeValueAsString(EditPost.builder()
                 .postId(post.getId())
@@ -1578,8 +1737,8 @@ public class PostControllerTest {
     @Test
     void test50() throws Exception {
         //given
+        Board board = boardFactory.createBoard("RR");
         Member member = memberFactory.createMember("editMember7");
-        Board board = boardFactory.createBoard("abcd");
         Post post = postFactory.createPost(member, board, true);
         String json = objectMapper.writeValueAsString(EditPost.builder()
                 .postId(post.getId())
@@ -1618,6 +1777,33 @@ public class PostControllerTest {
                 .andDo(print());
     }
 
+    @DisplayName("삭제된 글을 수정할수 없다")
+    @Test
+    void test5240() throws Exception {
+        //given
+        Board board = boardFactory.createBoard("MJ");
+        Member member = memberFactory.createMember("deleteMemberH");
+        Post post = postFactory.createPost(member, board, true);
+
+        //when
+        postRepository.delete(post);
+        String json = objectMapper.writeValueAsString(EditPost.builder()
+                .postId(post.getId())
+                .title("수정된 제목입니다")
+                .content("수정된 내용입니다")
+                .build());
+
+        //then
+        mockMvc.perform(patch("/posts")
+                        .contentType(APPLICATION_JSON)
+                        .content(json)
+                        .with(user("deleteMemberH"))
+                        .with(csrf()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("게시글이 존재하지 않거나 삭제되었습니다"))
+                .andDo(print());
+    }
+
 
     /**
      * 글 삭제 요청
@@ -1627,12 +1813,12 @@ public class PostControllerTest {
     @Test
     void test52() throws Exception {
         //given
+        Board board = boardFactory.createBoard("SS");
         Member member = memberFactory.createMember("deleteMember1234");
-        Board board = boardFactory.createBoard("abcd");
         Post post = postFactory.createPost(member, board, true);
 
         //then
-        mockMvc.perform(delete("/posts?id={postId}",post.getId())
+        mockMvc.perform(delete("/posts?id={postId}", post.getId())
                         .with(user("deleteMember1234"))
                         .with(csrf()))
                 .andExpect(status().isOk())
@@ -1644,12 +1830,12 @@ public class PostControllerTest {
     @Test
     void test53() throws Exception {
         //given
+        Board board = boardFactory.createBoard("TT");
         Member member = memberFactory.createMember("deleteMemberA");
-        Board board = boardFactory.createBoard("abcd");
         Post post = postFactory.createPost(member, board, true);
 
         //then
-        mockMvc.perform(delete("/posts?id={postId}",post.getId())
+        mockMvc.perform(delete("/posts?id={postId}", post.getId())
                         .with(csrf()))
                 .andExpect(status().isUnauthorized())
                 .andDo(print());
@@ -1660,8 +1846,8 @@ public class PostControllerTest {
     @Test
     void test54() throws Exception {
         //given
+        Board board = boardFactory.createBoard("UU");
         Member member = memberFactory.createMember("deleteMemberD");
-        Board board = boardFactory.createBoard("abcd");
         Post post = postFactory.createPost(member, board, true);
 
         //then
@@ -1699,6 +1885,7 @@ public class PostControllerTest {
 
         assertEquals(1, postRepository.count());
     }
+
     @DisplayName("존재하지 않는 글을 삭제할수 없다")
     @Test
     void test55() throws Exception {
@@ -1715,8 +1902,8 @@ public class PostControllerTest {
     @Test
     void test56() throws Exception {
         //given
+        Board board = boardFactory.createBoard("ZZ");
         Member member = memberFactory.createMember("jin1234");
-        Board board = boardFactory.createBoard("abcd");
         Post post = postFactory.createPost(member, board, true);
 
         //then
@@ -1731,4 +1918,23 @@ public class PostControllerTest {
 
         assertEquals(1L, postRepository.count());
     }
+
+    @DisplayName("이미 삭제된 글을 삭제할수 없다")
+    @Test
+    void test57() throws Exception {
+        //given
+        Board board = boardFactory.createBoard("ERTD");
+        Member member = memberFactory.createMember("jin1234AAA");
+        Post post = postFactory.createPost(member, board, true);
+        postRepository.delete(post);
+
+        //then
+        mockMvc.perform(delete("/posts?id={postId}", post.getId())
+                        .with(user("jin1234AAA"))
+                        .with(csrf()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("게시글이 존재하지 않거나 삭제되었습니다"))
+                .andDo(print());
+    }
+
 }

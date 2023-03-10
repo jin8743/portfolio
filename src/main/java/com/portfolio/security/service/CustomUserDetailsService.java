@@ -3,6 +3,7 @@ package com.portfolio.security.service;
 import com.portfolio.domain.Member;
 import com.portfolio.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,12 +29,14 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (optionalMember.isEmpty()) {
             optionalMember = memberRepository.findByEmail(usernameOrPassword);
         }
-
         if (optionalMember.isEmpty()) {
             throw new UsernameNotFoundException(INVALID_LOGIN_INFO);
         }
         Member member = optionalMember.get();
 
+        if (member.getIsEnabled() == false) {
+            throw new DisabledException(UNREGISTERED_ACCOUNT);
+        }
         return new CustomUser(member);
     }
 

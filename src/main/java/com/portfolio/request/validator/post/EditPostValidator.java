@@ -29,6 +29,7 @@ public class EditPostValidator implements Validator {
         EditPost request = (EditPost) target;
         if (request.getPostId() != null) {
             Post post = postRepository.findPostWithMemberById(request.getPostId());
+
             if (post == null) {
                 throw new CustomNotFoundException(POST_NOT_FOUND);
             }

@@ -26,7 +26,6 @@ public class BoardCreateValidator implements Validator {
     public void validate(Object target, Errors errors) {
         CreateBoard request = (CreateBoard) target;
 
-        /** 이 두개 모두 null 이 아닐경우 검증 진행 */
         String boardName = request.getBoardName();
         String nickname = request.getNickname();
 

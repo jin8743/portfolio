@@ -28,14 +28,17 @@ public class EditCommentValidator implements Validator {
     public void validate(Object target, Errors errors) {
         EditComment request = (EditComment) target;
         if (request.getCommentId() != null) {
-            Comment comment = commentRepository.findCommentWithMemberById(request.getCommentId());
+            Comment comment = commentRepository.findCommentWithMemberAndPostById(request.getCommentId());
 
-            if (comment == null) {
+            if (comment == null || comment.getIsEnabled() == false) {
                 throw new CustomNotFoundException(COMMENT_NOT_FOUND);
             }
             if (comment.getMember().getUsername()
                     .equals(getAuthenticatedUsername()) == false) {
                 throw new AuthorizationFailedException();
+            }
+            if (comment.getPost().getIsEnabled() == false) {
+                throw new CustomNotFoundException(POST_NOT_FOUND);
             }
         }
     }

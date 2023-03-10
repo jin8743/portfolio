@@ -12,6 +12,7 @@ import org.springframework.validation.Validator;
 
 import static com.portfolio.exception.custom.CustomNotFoundException.*;
 import static com.portfolio.repository.util.MemberUtil.getAuthenticatedUsername;
+import static com.portfolio.repository.util.MemberUtil.isAdmin;
 
 @RequiredArgsConstructor
 @Component
@@ -31,8 +32,8 @@ public class DeletePostValidator implements Validator{
         if (post == null) {
             throw new CustomNotFoundException(POST_NOT_FOUND);
         }
-        if (post.getMember().getUsername()
-                .equals(getAuthenticatedUsername()) == false) {
+        if (post.getMember().getUsername().equals(getAuthenticatedUsername()) == false
+                && isAdmin() == false) {
             throw new AuthorizationFailedException();
         }
     }
