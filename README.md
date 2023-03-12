@@ -48,27 +48,27 @@
 ### 관리자 기능 
 | Feature | Request | API | 설명
 | --- | --- | -- | ---
-| 게시판 생성 | POST | /admin/board | 
-| 회원정보 목록 조회  | GET | /admin/members?page= |
-| 회원정보 조회 | GET | /admin/members/{username} |
-| 글 삭제 | DELETE |  /admin/posts?id= |
-| 댓글 삭제 | DELETE | /admin/comments?id= |
-| 회원 강퇴  | DELETE | /admin/members/{username} |
+| 게시판 생성 | POST | /admin/board | 이용자들이 글을 작성할수 있는 게시판 생성
+| 회원정보 목록 조회  | GET | /admin/members?page= | 회원들의 정보 목록 페이징 조회 
+| 회원정보 조회 | GET | /admin/members/{username} | 특정 회원의 정보 조회 
+| 글 삭제 | DELETE |  /admin/posts?id= | 규정을 위반한 글 삭제
+| 댓글 삭제 | DELETE | /admin/comments?id= | 규정을 위반한 댓글 삭제
+| 회원 강퇴  | DELETE | /admin/members/{username} | 규정을 위반한 회원 강퇴 
 
 
-## Development
+## 글
+| Feature | Request | API | 설명
+| --- | --- | -- | ---
+| 작성 | POST | /posts | 글 단건 작성
+| 조회  | GET | /posts?id= | 글 단건 조회 
+| 전체글 목록 조회  | GET | /posts/view?page= | 전체글 목록 페이징 조회 
+| 특정 게시판 글 조회 | GET | /posts/board/view?page= | 특정 게시판에 작성된 글 목록 페이징 조회 
+| 특정 회원 글 조회  | GET | /member/{username}/posts?page= | 특정 회원이 작성한 글 목록 페이징 조회 
+| 특정 회원이 댓글작성한 글 조회 | GET | /member/{username}/commentPosts?page= | 특정 회원이 댓글을 남긴 글 목록 페이징 조회
+| 내가 좋아요 누르글 조회   | GET | /member/likePosts?page= | 내가 좋아요를 누른 글 목록 페이징 조회 
+| 수정 | PATCH | /posts | 내가 작성한 글 수정
+| 삭제  | DELETE | /posts?id= | 내가 작성한 글 삭제
 
-| Feature | Request | API | 설명 |
-| 회원가입 | POST | /join | 123 | 
-
-Want to contribute? Great!
-
-Dillinger uses Gulp + Webpack for fast developing.
-Make a change in your file and instantaneously see your updates!
-
-Open your favorite Terminal and run these commands.
-
-First Tab:
 
 ```sh
 node app
