@@ -59,26 +59,46 @@
 ## 글
 | Feature | Request | API | 설명
 | --- | --- | -- | ---
-| 작성 | POST | /posts | 글 단건 작성
-| 조회  | GET | /posts?id= | 글 단건 조회 
+| 글 작성 | POST | /posts |
+| 글 수정 | PATCH | /posts | 내가 작성한 글 수정
+| 글 삭제  | DELETE | /posts?id= | 내가 작성한 글 삭제
+| 글 조회  | GET | /posts?id= | 글 단건 조회 
 | 전체글 목록 조회  | GET | /posts/view?page= | 전체글 목록 페이징 조회 
 | 특정 게시판 글 조회 | GET | /posts/board/view?page= | 특정 게시판에 작성된 글 목록 페이징 조회 
 | 특정 회원 글 조회  | GET | /member/{username}/posts?page= | 특정 회원이 작성한 글 목록 페이징 조회 
 | 특정 회원이 댓글작성한 글 조회 | GET | /member/{username}/commentPosts?page= | 특정 회원이 댓글을 남긴 글 목록 페이징 조회
 | 내가 좋아요 누르글 조회   | GET | /member/likePosts?page= | 내가 좋아요를 누른 글 목록 페이징 조회 
-| 수정 | PATCH | /posts | 내가 작성한 글 수정
-| 삭제  | DELETE | /posts?id= | 내가 작성한 글 삭제
 
 
-```sh
-node app
-```
 
-Second Tab:
+## 댓글
+| Feature | Request | API | 설명
+| --- | --- | -- | ---
+| 댓글 작성 | POST | /comments 
+| 대댓글 작성  | POST | /comments/child 
+| 수정 | PATCH | /comments | 내가 작성한 댓글 수정
+| 삭제  | DELETE | /comments?id= | 내가 작성한 댓글 삭제
+| 글에 달린 댓글 개수 조회 | GET | /comments/count?id= | 특정 글에 달린 총 댓글과 대댓글의 개수 조회 
+| 글에 달린 댓글 조회 | GET | /comments?id= &page= | 특정 글에 달린 댓글과 대댓글 목록 페이징 조회 
+| 내가 작성한 댓글 조회 | GET | /member/comments?page= | 내가 작성한 댓글과 대댓글 목록 페이징 조회
 
-```sh
-gulp watch
-```
+## 좋아요
+| Feature | Request | API | 설명
+| --- | --- | -- | ---
+| 좋아요 등록 | POST | /likes?postId= | 특정 글에 좋아요 등록 
+| 좋아요 취소 | DELETE | /likes?postId= | 이미 눌렸던 좋아요 취소
+| 좋아요 조회 | GET | /likes?postId= | 특정 글에 달려있는 총 좋아요 개수와 내가 좋아요를 눌렀는지 여부 조회
+
+## 게시판
+| Feature | Request | API | 설명
+| --- | --- | -- | ---
+| 게시판 조회 | GET | /board | 모든 게시판 이름과 별칭 목록 조회 
+
+## 회원정보
+| Feature | Request | API | 설명
+| --- | --- | -- | ---
+| 회원정보 조회 | GET | /members/{username} | 회원 아이디와 총 작성한 글과 댓글의 개수 조회 
+
 
 (optional) Third:
 
